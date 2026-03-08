@@ -1,7 +1,617 @@
 <!DOCTYPE html>
-<html>
-  <body>
-    <h1>Hello World!</h1>
-    <p>This is my first website on GitHub.</p>
-  </body>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Retirement Strategist</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0c0a09;
+    --bg2: #1c1917;
+    --bg3: #292524;
+    --border: #44403c;
+    --border2: #292524;
+    --text: #f5f5f4;
+    --text2: #a8a29e;
+    --text3: #57534e;
+    --amber: #f59e0b;
+    --amber-light: #fcd34d;
+    --amber-dim: rgba(245,158,11,0.1);
+    --amber-border: rgba(245,158,11,0.35);
+    --green: #34d399;
+    --green-dim: rgba(52,211,153,0.1);
+    --green-border: rgba(52,211,153,0.3);
+    --blue: #38bdf8;
+    --blue-dim: rgba(56,189,248,0.1);
+    --blue-border: rgba(56,189,248,0.3);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.1);
+    --red-border: rgba(248,113,113,0.3);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* Header */
+  .header {
+    border-bottom: 1px solid var(--border2);
+    background: rgba(12,10,9,0.97);
+    position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(8px);
+    padding: 20px 24px;
+  }
+  .header-eyebrow {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--amber);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .header h1 {
+    font-family: Georgia, serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .container { max-width: 680px; margin: 0 auto; padding: 24px; }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 4px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 24px;
+  }
+  .tab-btn {
+    flex: 1;
+    background: none; border: none; cursor: pointer;
+    color: var(--text2);
+    font-size: 11px; font-weight: 700;
+    padding: 8px 4px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { background: var(--amber); color: #1c1917; }
+
+  /* Panels */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Grid */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .col2 { grid-column: span 2; }
+
+  /* Inputs */
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--text2);
+    font-weight: 700;
+  }
+  input, select {
+    width: 100%;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+  input:focus, select:focus { border-color: var(--amber); }
+  .input-hint { font-size: 10px; color: var(--text3); margin-top: 4px; }
+
+  /* Stat cards */
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .stats3 { grid-template-columns: 1fr 1fr 1fr; }
+  .stat {
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 12px; padding: 14px;
+  }
+  .stat.accent { border-color: var(--amber-border); background: var(--amber-dim); }
+  .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text3); margin-bottom: 4px; }
+  .stat-value { font-size: 18px; font-weight: 700; font-family: 'Courier New', monospace; color: var(--text); }
+  .stat.accent .stat-value { color: var(--amber-light); }
+  .stat-sub { font-size: 10px; color: var(--text3); margin-top: 4px; }
+
+  /* Insight cards */
+  .insight {
+    border-radius: 12px; border: 1px solid; padding: 14px;
+    display: flex; gap: 12px; margin-bottom: 10px;
+  }
+  .insight-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .insight.amber { border-color: var(--amber-border); background: var(--amber-dim); }
+  .insight.amber .insight-dot { background: var(--amber); }
+  .insight.green { border-color: var(--green-border); background: var(--green-dim); }
+  .insight.green .insight-dot { background: var(--green); }
+  .insight.blue { border-color: var(--blue-border); background: var(--blue-dim); }
+  .insight.blue .insight-dot { background: var(--blue); }
+  .insight.red { border-color: var(--red-border); background: var(--red-dim); }
+  .insight.red .insight-dot { background: var(--red); }
+  .insight-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .insight-body { font-size: 12px; color: var(--text2); line-height: 1.6; }
+
+  /* Badge */
+  .badge {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    padding: 2px 10px; border-radius: 999px; border: 1px solid;
+  }
+  .badge.amber { color: var(--amber); border-color: var(--amber-border); background: var(--amber-dim); }
+  .badge.green { color: var(--green); border-color: var(--green-border); background: var(--green-dim); }
+  .badge.blue { color: var(--blue); border-color: var(--blue-border); background: var(--blue-dim); }
+  .badge.red { color: var(--red); border-color: var(--red-border); background: var(--red-dim); }
+
+  /* Verdict box */
+  .verdict-box {
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 12px; padding: 16px; margin-bottom: 20px;
+  }
+  .verdict-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .verdict-header span { font-size: 13px; font-weight: 600; color: var(--text2); }
+
+  /* Catch-up box */
+  .catchup-box {
+    background: var(--amber-dim); border: 1px solid var(--amber-border);
+    border-radius: 12px; padding: 16px; margin-bottom: 20px;
+  }
+  .catchup-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.2em; color: var(--amber); margin-bottom: 10px;
+  }
+  .catchup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .catchup-label { font-size: 11px; color: var(--text2); margin-bottom: 2px; }
+  .catchup-value { font-size: 16px; font-weight: 700; font-family: 'Courier New', monospace; color: var(--amber-light); }
+  .catchup-value.green { color: var(--green); }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; }
+  table { width: 100%; border-collapse: collapse; font-family: 'Courier New', monospace; font-size: 12px; }
+  th {
+    background: var(--bg2); color: var(--text3);
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border);
+  }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border2); color: var(--text2); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  td.highlight { color: var(--amber-light); font-weight: 700; }
+  td.muted { color: var(--text3); }
+  .bracket-pill {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    padding: 1px 6px; border-radius: 4px;
+  }
+  .bracket-high { background: rgba(248,113,113,0.2); color: #f87171; }
+  .bracket-mid { background: rgba(245,158,11,0.2); color: var(--amber); }
+  .bracket-low { background: rgba(52,211,153,0.2); color: var(--green); }
+
+  /* ACA sweet spots */
+  .sweetspot {
+    display: flex; align-items: center; justify-content: space-between;
+    border-radius: 8px; padding: 10px 14px; border: 1px solid var(--border2);
+    background: var(--bg2); margin-bottom: 8px;
+  }
+  .sweetspot.near { border-color: var(--amber-border); background: var(--amber-dim); }
+  .sweetspot-label { font-size: 12px; font-weight: 600; color: var(--text2); }
+  .sweetspot-value { font-family: 'Courier New', monospace; font-size: 13px; color: var(--text); }
+  .sweetspot-gap { font-size: 11px; color: var(--green); margin-left: 8px; }
+
+  .section-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em;
+    color: var(--text3); margin-bottom: 10px; font-weight: 700;
+  }
+
+  .disclaimer {
+    margin-top: 32px; padding-top: 16px;
+    border-top: 1px solid var(--border2);
+    text-align: center; font-size: 11px; color: var(--text3); line-height: 1.6;
+  }
+
+  @media (max-width: 520px) {
+    .grid2, .stats { grid-template-columns: 1fr; }
+    .stats3 { grid-template-columns: 1fr 1fr; }
+    .col2 { grid-column: span 1; }
+    .tab-btn { font-size: 9px; }
+    .catchup-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="max-width:680px;margin:0 auto;">
+    <div class="header-eyebrow">Retirement Intelligence</div>
+    <h1>Your Retirement Strategist</h1>
+  </div>
+</div>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(0)">401k → Roth</button>
+    <button class="tab-btn" onclick="switchTab(1)">RMD Planner</button>
+    <button class="tab-btn" onclick="switchTab(2)">Tax Optimizer</button>
+    <button class="tab-btn" onclick="switchTab(3)">ACA Strategy</button>
+  </div>
+
+  <!-- ── Tab 0: Roth Conversion ── -->
+  <div class="panel active" id="panel-0">
+    <div class="grid2">
+      <div class="field"><label>Current Age</label><input type="number" id="r-age" value="58" oninput="updateRoth()"></div>
+      <div class="field"><label>Retirement Age</label><input type="number" id="r-retage" value="65" oninput="updateRoth()"></div>
+      <div class="field"><label>401k Balance ($)</label><input type="number" id="r-balance" value="500000" oninput="updateRoth()"></div>
+      <div class="field"><label>Current Annual Income ($)</label><input type="number" id="r-income" value="80000" oninput="updateRoth()"></div>
+      <div class="field"><label>Conversion Amount ($)</label><input type="number" id="r-convert" value="30000" oninput="updateRoth()"></div>
+      <div class="field"><label>Annual Growth Rate (%)</label><input type="number" id="r-growth" value="6" oninput="updateRoth()"></div>
+    </div>
+    <div class="stats" id="roth-stats"></div>
+    <div class="verdict-box">
+      <div class="verdict-header">
+        <span>Conversion Verdict</span>
+        <span id="roth-verdict-badge"></span>
+      </div>
+      <div id="roth-insights"></div>
+    </div>
+  </div>
+
+  <!-- ── Tab 1: RMD Planner ── -->
+  <div class="panel" id="panel-1">
+    <div class="grid2">
+      <div class="field"><label>Current Age</label><input type="number" id="rmd-age" value="68" oninput="updateRMD()"></div>
+      <div class="field"><label>Current 401k/IRA Balance ($)</label><input type="number" id="rmd-balance" value="800000" oninput="updateRMD()"></div>
+      <div class="field"><label>Annual Growth Rate (%)</label><input type="number" id="rmd-growth" value="5" oninput="updateRMD()"></div>
+      <div class="field"><label>Annual SS Income ($)</label><input type="number" id="rmd-ss" value="24000" oninput="updateRMD()"></div>
+      <div class="field col2"><label>Other Annual Income ($)</label><input type="number" id="rmd-other" value="20000" oninput="updateRMD()"></div>
+    </div>
+    <div class="stats stats3" id="rmd-stats"></div>
+    <div class="section-label">RMD Schedule Projection</div>
+    <div class="table-wrap"><table id="rmd-table"></table></div>
+    <div id="rmd-insights"></div>
+  </div>
+
+  <!-- ── Tab 2: Tax Optimizer ── -->
+  <div class="panel" id="panel-2">
+    <div class="grid2">
+      <div class="field"><label>Age</label><input type="number" id="t-age" value="55" oninput="updateTax()"></div>
+      <div class="field"><label>Gross Annual Income ($)</label><input type="number" id="t-income" value="95000" oninput="updateTax()"></div>
+      <div class="field">
+        <label>401k Contribution ($)</label>
+        <input type="number" id="t-401k" value="23000" oninput="updateTax()">
+        <div class="input-hint" id="t-401k-hint"></div>
+      </div>
+      <div class="field">
+        <label>HSA Contribution ($)</label>
+        <input type="number" id="t-hsa" value="4150" oninput="updateTax()">
+        <div class="input-hint" id="t-hsa-hint"></div>
+      </div>
+    </div>
+    <div class="stats" id="tax-stats"></div>
+    <div class="catchup-box" id="catchup-box" style="display:none">
+      <div class="catchup-title">🎯 Catch-Up Contribution Bonus</div>
+      <div class="catchup-grid" id="catchup-grid"></div>
+    </div>
+    <div class="section-label">Tax Reduction Strategies</div>
+    <div id="tax-insights"></div>
+  </div>
+
+  <!-- ── Tab 3: ACA Strategy ── -->
+  <div class="panel" id="panel-3">
+    <div class="grid2">
+      <div class="field"><label>Age</label><input type="number" id="aca-age" value="60" oninput="updateACA()"></div>
+      <div class="field">
+        <label>Household Size</label>
+        <select id="aca-size" onchange="updateACA()">
+          <option value="1">1 person</option>
+          <option value="2" selected>2 people</option>
+          <option value="3">3 people</option>
+          <option value="4">4 people</option>
+          <option value="5">5 people</option>
+        </select>
+      </div>
+      <div class="field col2">
+        <label>Estimated MAGI ($)</label>
+        <input type="number" id="aca-magi" value="55000" oninput="updateACA()">
+        <div class="input-hint">MAGI = AGI + tax-exempt interest + excluded foreign income</div>
+      </div>
+    </div>
+    <div class="verdict-box" id="aca-position-box">
+      <div class="verdict-header">
+        <span>Your ACA Position</span>
+        <span id="aca-zone-badge"></span>
+      </div>
+      <div class="stats stats3" id="aca-stats" style="margin-bottom:12px;"></div>
+      <div id="aca-desc" style="font-size:12px;color:var(--text2);line-height:1.6;"></div>
+    </div>
+    <div class="section-label">Income Sweet Spots for Your Household</div>
+    <div id="aca-sweetspots" style="margin-bottom:20px;"></div>
+    <div class="section-label">ACA Income Management Strategies</div>
+    <div id="aca-insights"></div>
+  </div>
+
+  <div class="disclaimer">Educational tool only. Not financial, tax, or legal advice.<br>Consult a qualified financial advisor or CPA for your specific situation.</div>
+</div>
+
+<script>
+// ── Data ─────────────────────────────────────────────────────────────────────
+const BRACKETS = [
+  {min:0,      max:11600,  rate:0.10, label:"10%"},
+  {min:11600,  max:47150,  rate:0.12, label:"12%"},
+  {min:47150,  max:100525, rate:0.22, label:"22%"},
+  {min:100525, max:191950, rate:0.24, label:"24%"},
+  {min:191950, max:243725, rate:0.32, label:"32%"},
+  {min:243725, max:609350, rate:0.35, label:"35%"},
+  {min:609350, max:Infinity,rate:0.37,label:"37%"},
+];
+const RMD_TABLE = {72:27.4,73:26.5,74:25.5,75:24.6,76:23.7,77:22.9,78:22.0,79:21.1,80:20.2,81:19.4,82:18.5,83:17.7,84:16.8,85:16.0,86:15.2,87:14.4,88:13.7,89:12.9,90:12.2,91:11.5,92:10.8,93:10.1,94:9.5,95:8.9};
+const FPL = {1:15060,2:20440,3:25820,4:31200,5:36580};
+
+function calcTax(income) {
+  let tax = 0, prev = 0;
+  for (const b of BRACKETS) {
+    if (income <= prev) break;
+    tax += (Math.min(income, b.max) - prev) * b.rate;
+    prev = b.max;
+  }
+  return tax;
+}
+function getMarginal(income) {
+  for (const b of BRACKETS) if (income <= b.max) return b;
+  return BRACKETS[BRACKETS.length-1];
+}
+function calcRMD(bal, age) {
+  const a = Math.min(Math.max(age,72),95);
+  return RMD_TABLE[a] ? bal / RMD_TABLE[a] : null;
+}
+function fmt(n) { return Math.round(n).toLocaleString(); }
+function fmtK(n) { return (n/1000).toFixed(0)+'k'; }
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function statCard(label, value, sub, accent) {
+  return `<div class="stat${accent?' accent':''}">
+    <div class="stat-label">${label}</div>
+    <div class="stat-value">${value}</div>
+    ${sub?`<div class="stat-sub">${sub}</div>`:''}
+  </div>`;
+}
+function badge(text, color) {
+  return `<span class="badge ${color}">${text}</span>`;
+}
+function insight(color, title, body) {
+  return `<div class="insight ${color}">
+    <div class="insight-dot"></div>
+    <div><div class="insight-title">${title}</div><div class="insight-body">${body}</div></div>
+  </div>`;
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(i) {
+  document.querySelectorAll('.panel').forEach((p,j) => p.classList.toggle('active', i===j));
+  document.querySelectorAll('.tab-btn').forEach((b,j) => b.classList.toggle('active', i===j));
+}
+
+// ── Roth Conversion ───────────────────────────────────────────────────────────
+function updateRoth() {
+  const age = +document.getElementById('r-age').value||58;
+  const balance = +document.getElementById('r-balance').value||500000;
+  const income = +document.getElementById('r-income').value||80000;
+  const convert = +document.getElementById('r-convert').value||30000;
+  const growth = +document.getElementById('r-growth').value||6;
+
+  const totalIncome = income + convert;
+  const taxBefore = calcTax(income);
+  const taxAfter = calcTax(totalIncome);
+  const convCost = taxAfter - taxBefore;
+  const effRate = convCost / convert;
+  const marginal = getMarginal(totalIncome);
+  const bracketBefore = getMarginal(income);
+  const yearsToRMD = Math.max(0, 73 - age);
+  const projBal = balance * Math.pow(1 + growth/100, yearsToRMD);
+  const rmdAtStart = calcRMD(projBal, 73);
+  const shouldConvert = bracketBefore.rate < 0.24 && yearsToRMD > 3;
+
+  document.getElementById('roth-stats').innerHTML =
+    statCard('Tax on Conversion', `$${fmt(convCost)}`, `Effective rate: ${(effRate*100).toFixed(1)}%`) +
+    statCard('Your Marginal Bracket', marginal.label, `After-conversion income: $${fmt(totalIncome)}`, true) +
+    statCard('Years Until RMD', yearsToRMD===0?'Active Now':`${yearsToRMD} years`, 'RMDs begin at age 73') +
+    statCard('Est. RMD at Age 73', `$${fmt(rmdAtStart||0)}/yr`, `On $${fmt(projBal)} projected`);
+
+  document.getElementById('roth-verdict-badge').innerHTML = badge(
+    shouldConvert ? '✓ Convert Now' : 'Wait / Partial',
+    shouldConvert ? 'green' : 'amber'
+  );
+
+  let ins = '';
+  if (shouldConvert) {
+    ins += insight('green','Good conversion window',
+      `You're in the ${bracketBefore.label} bracket with ${yearsToRMD} years before RMDs. Converting now locks in today's lower rates before forced distributions inflate your income.`);
+    ins += insight('amber','Bracket ceiling tip',
+      `Don't convert past the top of your current ${bracketBefore.label} bracket ($${fmt(bracketBefore.max)}). Converting up to $${fmt(bracketBefore.max-income)} more fills your bracket efficiently.`);
+  } else {
+    ins += insight('amber','Higher bracket risk',
+      `Adding $${fmt(convert)} pushes you into the ${marginal.label} bracket. Consider converting only up to the ${bracketBefore.label} ceiling ($${fmt(bracketBefore.max)}).`);
+    ins += insight('blue','Strategic partial conversion',
+      'Small annual conversions in low-income years (e.g., between retirement and Social Security) can be highly tax-efficient.');
+  }
+  ins += insight('blue','5-year Roth rule',
+    'Converted funds must stay in Roth for 5 years before tax-free withdrawal. Plan accordingly if you\'re within 5 years of needing the funds.');
+  document.getElementById('roth-insights').innerHTML = ins;
+}
+
+// ── RMD Planner ───────────────────────────────────────────────────────────────
+function updateRMD() {
+  const currentAge = +document.getElementById('rmd-age').value||68;
+  const balance = +document.getElementById('rmd-balance').value||800000;
+  const growth = +document.getElementById('rmd-growth').value||5;
+  const ss = +document.getElementById('rmd-ss').value||24000;
+  const other = +document.getElementById('rmd-other').value||20000;
+
+  const rows = [];
+  let bal = balance;
+  for (let age = Math.max(currentAge, 63); age <= 90; age++) {
+    const rmd = age >= 73 ? calcRMD(bal, age) : null;
+    const totalInc = (rmd||0) + (age>=62?ss:0) + other;
+    const tax = rmd ? calcTax(totalInc) : null;
+    const bracket = rmd ? getMarginal(totalInc) : null;
+    rows.push({age, balance:Math.round(bal), rmd:rmd?Math.round(rmd):null, totalInc:Math.round(totalInc), tax:tax?Math.round(tax):null, bracket});
+    if (rmd) bal = (bal-rmd)*(1+growth/100);
+    else bal = bal*(1+growth/100);
+  }
+
+  const first = rows.find(r=>r.rmd);
+  document.getElementById('rmd-stats').innerHTML = !first ? '' :
+    statCard('First RMD Age','73','SECURE 2.0 Act',true) +
+    statCard('First RMD Amount',`$${fmt(first.rmd)}`,`Balance: $${fmt(first.balance)}`) +
+    statCard('First RMD Tax',`$${fmt(first.tax)}`,`Bracket: ${first.bracket.label}`);
+
+  let thead = `<tr>${['Age','Balance','RMD','Total Income','Est. Tax','Bracket'].map(h=>`<th>${h}</th>`).join('')}</tr>`;
+  let tbody = rows.map(r=>{
+    const bClass = r.bracket ? (r.bracket.rate>=0.24?'bracket-high':r.bracket.rate>=0.22?'bracket-mid':'bracket-low') : '';
+    return `<tr>
+      <td class="${r.age===73?'highlight':''}">${r.age}</td>
+      <td>$${fmtK(r.balance)}</td>
+      <td class="${r.rmd?'highlight':'muted'}">${r.rmd?'$'+fmt(r.rmd):'—'}</td>
+      <td>${r.rmd?'$'+fmt(r.totalInc):'—'}</td>
+      <td>${r.tax?'$'+fmt(r.tax):'—'}</td>
+      <td>${r.bracket?`<span class="bracket-pill ${bClass}">${r.bracket.label}</span>`:'—'}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('rmd-table').innerHTML = `<thead>${thead}</thead><tbody>${tbody}</tbody>`;
+
+  document.getElementById('rmd-insights').innerHTML =
+    insight('amber','Penalty for missing RMDs','The IRS imposes a 25% excise tax on any RMD not withdrawn on time (reduced to 10% if corrected within 2 years). Always withdraw before Dec 31.') +
+    insight('blue','QCD strategy','If you\'re 70½+, Qualified Charitable Distributions (QCDs) up to $105,000/year count toward your RMD and are excluded from income — a powerful tax move for donors.') +
+    insight('green','Still working exception','If still employed at 73+, you may delay RMDs from your current employer\'s 401k (but not IRAs). Consider rolling old IRAs into your current plan.');
+}
+
+// ── Tax Optimizer ─────────────────────────────────────────────────────────────
+function updateTax() {
+  const age = +document.getElementById('t-age').value||55;
+  const income = +document.getElementById('t-income').value||95000;
+  const contrib401k = +document.getElementById('t-401k').value||23000;
+  const hsa = +document.getElementById('t-hsa').value||4150;
+  const stdDed = 14600;
+
+  const limit401k = age>=50 ? 30500 : 23000;
+  const hsaLimit = age>=55 ? 5150 : 4150;
+  const extraCatchup = (age>=60 && age<=63) ? 3750 : 0;
+
+  document.getElementById('t-401k-hint').textContent = `Max: $${limit401k.toLocaleString()}`;
+  document.getElementById('t-hsa-hint').textContent = `Max: $${hsaLimit.toLocaleString()}`;
+
+  const taxable = Math.max(0, income - contrib401k - hsa - stdDed);
+  const tax = calcTax(taxable);
+  const effRate = income>0?(tax/income)*100:0;
+  const bracket = getMarginal(taxable);
+  const room = (limit401k - contrib401k) + (hsaLimit - hsa);
+
+  document.getElementById('tax-stats').innerHTML =
+    statCard('Taxable Income',`$${fmt(taxable)}`,'After deductions') +
+    statCard('Est. Federal Tax',`$${fmt(tax)}`,`Effective rate: ${effRate.toFixed(1)}%`,true) +
+    statCard('Marginal Bracket',bracket.label,'Your top rate') +
+    statCard('Room to Reduce Tax',`$${fmt(Math.max(0,room))}`,'More you could shelter');
+
+  const catchupBox = document.getElementById('catchup-box');
+  if (age>=50) {
+    catchupBox.style.display='block';
+    let html = `<div><div class="catchup-label">401k Catch-Up</div><div class="catchup-value">+$7,500/yr</div></div>
+      <div><div class="catchup-label">HSA Catch-Up (55+)</div><div class="catchup-value">+$1,000/yr</div></div>`;
+    if (extraCatchup>0) html += `<div style="grid-column:span 2"><div class="catchup-label">Ages 60–63 Super Catch-Up (SECURE 2.0)</div><div class="catchup-value green">+$3,750/yr extra</div></div>`;
+    document.getElementById('catchup-grid').innerHTML = html;
+  } else {
+    catchupBox.style.display='none';
+  }
+
+  document.getElementById('tax-insights').innerHTML =
+    insight('green','Maximize HSA — triple tax advantage','HSA contributions are pre-tax, grow tax-free, and withdraw tax-free for medical. After 65, withdraw for ANY reason at ordinary income rates (like a traditional IRA). This is the best account in the tax code.') +
+    insight('blue',`Traditional vs Roth 401k decision`,`In the ${bracket.label} bracket, traditional 401k contributions save you ${bracket.label} now. If you expect a lower bracket in retirement, traditional wins. In 12% or lower, Roth is often better.`) +
+    insight('amber','Tax-loss harvesting','Offset capital gains with investment losses. Up to $3,000 in excess losses can offset ordinary income per year, with unlimited carryforward.') +
+    insight('amber','Roth IRA income limits (2024)','Direct Roth IRA contributions phase out between $146k–$161k (single) or $230k–$240k (married). Above that, use the Backdoor Roth IRA strategy.');
+}
+
+// ── ACA Strategy ─────────────────────────────────────────────────────────────
+function updateACA() {
+  const age = +document.getElementById('aca-age').value||60;
+  const size = +document.getElementById('aca-size').value||2;
+  const magi = +document.getElementById('aca-magi').value||55000;
+
+  const fpl = FPL[Math.min(size,5)];
+  const fplPct = (magi/fpl)*100;
+  const premiumCap = magi*0.085/12;
+
+  let zone='', color='amber', desc='';
+  if (fplPct<100) { zone='Medicaid territory'; color='blue'; desc='Below 100% FPL. In most states you qualify for Medicaid. In non-expansion states you may fall in the coverage gap — no ACA subsidy and no Medicaid.'; }
+  else if (fplPct<150) { zone='Benchmark plan = $0'; color='green'; desc='Between 100–150% FPL. Your benchmark silver plan premium is $0/month with maximum cost-sharing reductions (CSR). Best ACA zone.'; }
+  else if (fplPct<200) { zone='Excellent subsidies + CSR'; color='green'; desc='150–200% FPL. Strong premium tax credits and enhanced cost-sharing reductions. Enroll in a Silver plan to get CSR benefits.'; }
+  else if (fplPct<250) { zone='Good subsidies'; color='green'; desc='200–250% FPL. Solid premium tax credits still available. Silver plans with moderate CSR. Compare silver vs bronze net costs carefully.'; }
+  else if (fplPct<400) { zone='Moderate subsidies'; color='amber'; desc='250–400% FPL. Premium tax credits apply but are smaller. Cap your premium at ~8.5% of MAGI. Evaluate gold vs silver plans.'; }
+  else if (fplPct<500) { zone='Subsidy eligible (ARP extension)'; color='amber'; desc='400%+ FPL. Under the ARP/IRA extensions, subsidies now extend beyond 400% FPL — you pay no more than 8.5% of MAGI for the benchmark plan.'; }
+  else { zone='May be above subsidy cliff'; color='red'; desc='At very high income levels, subsidies may phase out entirely. Consider income management strategies below.'; }
+
+  document.getElementById('aca-zone-badge').innerHTML = badge(zone, color);
+  document.getElementById('aca-stats').innerHTML =
+    statCard('FPL %',`${fplPct.toFixed(0)}%`,`FPL = $${fpl.toLocaleString()}`,(fplPct>=100&&fplPct<400)) +
+    statCard('2024 FPL',`$${fpl.toLocaleString()}`,`${size}-person household`) +
+    statCard('Max Monthly Premium',`$${fmt(premiumCap)}`,'8.5% MAGI cap (benchmark)');
+  document.getElementById('aca-desc').textContent = desc;
+
+  const spots = [
+    {label:'138% FPL (Medicaid edge)', income:Math.round(fpl*1.38)},
+    {label:'150% FPL ($0 premium)',    income:Math.round(fpl*1.50)},
+    {label:'200% FPL',                 income:Math.round(fpl*2.00)},
+    {label:'250% FPL',                 income:Math.round(fpl*2.50)},
+    {label:'400% FPL (old cliff)',     income:Math.round(fpl*4.00)},
+  ];
+  document.getElementById('aca-sweetspots').innerHTML = spots.map(s=>{
+    const near = Math.abs(s.income-magi)<5000;
+    const diff = s.income - magi;
+    return `<div class="sweetspot${near?' near':''}">
+      <div>
+        <span class="sweetspot-label">${s.label}</span>
+        ${near?` ${badge('Near you','amber')}`:''}
+      </div>
+      <div style="display:flex;align-items:center;">
+        <span class="sweetspot-value">$${s.income.toLocaleString()}</span>
+        ${diff>0&&diff<20000?`<span class="sweetspot-gap">↓ $${fmt(diff)} to reach</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  let ins =
+    insight('green','MAGI reduction tools','Traditional 401k, IRA, HSA contributions all reduce MAGI. If you\'re near a higher FPL threshold, increasing these contributions can move you into a better subsidy band — potentially worth thousands.') +
+    insight('amber','Capital gains timing','Long-term capital gains count toward MAGI. Defer realizing gains if you\'re near a subsidy cliff. Even $1 over a threshold can cost significant subsidy dollars.') +
+    insight('blue','Silver plan priority for CSR','Cost-Sharing Reductions (lower deductibles/copays) are ONLY available on Silver plans. If your income is 100–250% FPL, a Silver plan is almost always the best value even if the premium looks higher.') +
+    insight('red','Avoid the subsidy clawback trap','If you underestimate income and receive excess advance premium credits, you\'ll owe the difference at tax time. Reconcile mid-year if income changes significantly.');
+  if (age>=60) ins += insight('green','Age 60+ premium boost','ACA allows insurers to charge older enrollees up to 3× younger ones. Your subsidies cover this increase — at 60+, the dollar value of your premium tax credit is substantially higher.');
+  document.getElementById('aca-insights').innerHTML = ins;
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+updateRoth();
+updateRMD();
+updateTax();
+updateACA();
+</script>
+</body>
 </html>
+
