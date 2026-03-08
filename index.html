@@ -512,9 +512,9 @@ function updateTax() {
   const hsa = +document.getElementById('t-hsa').value||4150;
   const stdDed = 14600;
 
-  const limit401k = age>=50 ? 30500 : 23000;
+  const limit401k = age>=50 ? 31000 : 23000;
   const hsaLimit = age>=55 ? 5150 : 4150;
-  const extraCatchup = (age>=60 && age<=63) ? 3750 : 0;
+  const extraCatchup = (age>=60 && age<=63) ? 34250 : 0;
 
   document.getElementById('t-401k-hint').textContent = `Max: $${limit401k.toLocaleString()}`;
   document.getElementById('t-hsa-hint').textContent = `Max: $${hsaLimit.toLocaleString()}`;
@@ -534,9 +534,9 @@ function updateTax() {
   const catchupBox = document.getElementById('catchup-box');
   if (age>=50) {
     catchupBox.style.display='block';
-    let html = `<div><div class="catchup-label">401k Catch-Up</div><div class="catchup-value">+$7,500/yr</div></div>
+    let html = `<div><div class="catchup-label">401k Catch-Up</div><div class="catchup-value">+$8,000/yr</div></div>
       <div><div class="catchup-label">HSA Catch-Up (55+)</div><div class="catchup-value">+$1,000/yr</div></div>`;
-    if (extraCatchup>0) html += `<div style="grid-column:span 2"><div class="catchup-label">Ages 60–63 Super Catch-Up (SECURE 2.0)</div><div class="catchup-value green">+$3,750/yr extra</div></div>`;
+    if (extraCatchup>0) html += `<div style="grid-column:span 2"><div class="catchup-label">Ages 60–63 Super Catch-Up (SECURE 2.0)</div><div class="catchup-value green">+$11,250/yr extra</div></div>`;
     document.getElementById('catchup-grid').innerHTML = html;
   } else {
     catchupBox.style.display='none';
