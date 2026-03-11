@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Retirement Strategist</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0c0a09; --bg2: #1c1917; --bg3: #292524;
+    --border: #44403c; --border2: #292524;
+    --text: #f5f5f4; --text2: #a8a29e; --text3: #57534e;
+    --amber: #f59e0b; --amber-light: #fcd34d;
+    --amber-dim: rgba(245,158,11,0.1); --amber-border: rgba(245,158,11,0.35);
+    --green: #34d399; --green-dim: rgba(52,211,153,0.1); --green-border: rgba(52,211,153,0.3);
+    --blue: #38bdf8; --blue-dim: rgba(56,189,248,0.1); --blue-border: rgba(56,189,248,0.3);
+    --red: #f87171; --red-dim: rgba(248,113,113,0.1); --red-border: rgba(248,113,113,0.3);
+    --purple: #a78bfa; --purple-dim: rgba(167,139,250,0.1); --purple-border: rgba(167,139,250,0.3);
+  }
+  body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; min-height:100vh; font-size:14px; }
+  .header { border-bottom:1px solid var(--border2); background:rgba(12,10,9,0.97); position:sticky; top:0; z-index:10; backdrop-filter:blur(8px); padding:20px 24px; }
+  .header-eyebrow { font-size:10px; text-transform:uppercase; letter-spacing:0.25em; color:var(--amber); font-weight:700; margin-bottom:4px; }
+  .header h1 { font-family:Georgia,serif; font-size:22px; font-weight:700; letter-spacing:-0.02em; color:var(--text); }
+  .container { max-width:720px; margin:0 auto; padding:24px; }
+  .tabs { display:flex; gap:3px; background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:4px; margin-bottom:24px; overflow-x:auto; }
+  .tab-btn { flex:1; min-width:70px; background:none; border:none; cursor:pointer; color:var(--text2); font-size:10px; font-weight:700; padding:8px 4px; border-radius:8px; transition:all 0.2s; text-align:center; white-space:nowrap; }
+  .tab-btn:hover { color:var(--text); }
+  .tab-btn.active { background:var(--amber); color:#1c1917; }
+  .panel { display:none; } .panel.active { display:block; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+  .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:20px; }
+  .col2 { grid-column:span 2; }
+  .field { display:flex; flex-direction:column; gap:6px; }
+  label { font-size:10px; text-transform:uppercase; letter-spacing:0.2em; color:var(--text2); font-weight:700; }
+  input, select { width:100%; background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:10px 14px; color:var(--text); font-family:'Courier New',monospace; font-size:13px; outline:none; transition:border-color 0.2s; appearance:none; }
+  input:focus, select:focus { border-color:var(--amber); }
+  .input-hint { font-size:10px; color:var(--text3); margin-top:4px; }
+  .stats { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+  .stats3 { grid-template-columns:1fr 1fr 1fr; }
+  .stats4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+  .stat { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:14px; }
+  .stat.accent { border-color:var(--amber-border); background:var(--amber-dim); }
+  .stat.gc { border-color:var(--green-border); background:var(--green-dim); }
+  .stat.rc { border-color:var(--red-border); background:var(--red-dim); }
+  .stat.bc { border-color:var(--blue-border); background:var(--blue-dim); }
+  .stat.pc { border-color:var(--purple-border); background:var(--purple-dim); }
+  .stat-label { font-size:10px; text-transform:uppercase; letter-spacing:0.15em; color:var(--text3); margin-bottom:4px; }
+  .stat-value { font-size:18px; font-weight:700; font-family:'Courier New',monospace; color:var(--text); }
+  .stat.accent .stat-value { color:var(--amber-light); }
+  .stat.gc .stat-value { color:var(--green); }
+  .stat.rc .stat-value { color:var(--red); }
+  .stat.bc .stat-value { color:var(--blue); }
+  .stat.pc .stat-value { color:var(--purple); }
+  .stat-sub { font-size:10px; color:var(--text3); margin-top:4px; }
+  .insight { border-radius:12px; border:1px solid; padding:14px; display:flex; gap:12px; margin-bottom:10px; }
+  .insight-dot { width:8px; height:8px; border-radius:50%; margin-top:5px; flex-shrink:0; }
+  .insight.amber { border-color:var(--amber-border); background:var(--amber-dim); }
+  .insight.amber .insight-dot { background:var(--amber); }
+  .insight.green { border-color:var(--green-border); background:var(--green-dim); }
+  .insight.green .insight-dot { background:var(--green); }
+  .insight.blue { border-color:var(--blue-border); background:var(--blue-dim); }
+  .insight.blue .insight-dot { background:var(--blue); }
+  .insight.red { border-color:var(--red-border); background:var(--red-dim); }
+  .insight.red .insight-dot { background:var(--red); }
+  .insight.purple { border-color:var(--purple-border); background:var(--purple-dim); }
+  .insight.purple .insight-dot { background:var(--purple); }
+  .insight-title { font-size:13px; font-weight:600; color:var(--text); margin-bottom:4px; }
+  .insight-body { font-size:12px; color:var(--text2); line-height:1.6; }
+  .badge { display:inline-block; font-size:11px; font-weight:700; padding:2px 10px; border-radius:999px; border:1px solid; }
+  .badge.amber { color:var(--amber); border-color:var(--amber-border); background:var(--amber-dim); }
+  .badge.green { color:var(--green); border-color:var(--green-border); background:var(--green-dim); }
+  .badge.blue { color:var(--blue); border-color:var(--blue-border); background:var(--blue-dim); }
+  .badge.red { color:var(--red); border-color:var(--red-border); background:var(--red-dim); }
+  .badge.purple { color:var(--purple); border-color:var(--purple-border); background:var(--purple-dim); }
+  .box { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:16px; margin-bottom:20px; }
+  .box-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .box-title { font-size:13px; font-weight:600; color:var(--text2); }
+  .catchup-box { background:var(--amber-dim); border:1px solid var(--amber-border); border-radius:12px; padding:16px; margin-bottom:20px; }
+  .catchup-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.2em; color:var(--amber); margin-bottom:10px; }
+  .catchup-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .catchup-label { font-size:11px; color:var(--text2); margin-bottom:2px; }
+  .catchup-value { font-size:16px; font-weight:700; font-family:'Courier New',monospace; color:var(--amber-light); }
+  .catchup-value.green { color:var(--green); }
+  .table-wrap { overflow-x:auto; border-radius:12px; border:1px solid var(--border); margin-bottom:20px; }
+  table { width:100%; border-collapse:collapse; font-family:'Courier New',monospace; font-size:12px; }
+  th { background:var(--bg2); color:var(--text3); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; padding:10px 12px; text-align:left; border-bottom:1px solid var(--border); }
+  td { padding:8px 12px; border-bottom:1px solid var(--border2); color:var(--text2); }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:rgba(255,255,255,0.02); }
+  td.hl { color:var(--amber-light); font-weight:700; }
+  td.muted { color:var(--text3); }
+  .bp { display:inline-block; font-size:10px; font-weight:700; padding:1px 6px; border-radius:4px; }
+  .bh { background:rgba(248,113,113,0.2); color:#f87171; }
+  .bm { background:rgba(245,158,11,0.2); color:var(--amber); }
+  .bl { background:rgba(52,211,153,0.2); color:var(--green); }
+  .sweetspot { display:flex; align-items:center; justify-content:space-between; border-radius:8px; padding:10px 14px; border:1px solid var(--border2); background:var(--bg2); margin-bottom:8px; }
+  .sweetspot.near { border-color:var(--amber-border); background:var(--amber-dim); }
+  .sweetspot-label { font-size:12px; font-weight:600; color:var(--text2); }
+  .sweetspot-value { font-family:'Courier New',monospace; font-size:13px; color:var(--text); }
+  .sweetspot-gap { font-size:11px; color:var(--green); margin-left:8px; }
+  .section-label { font-size:10px; text-transform:uppercase; letter-spacing:0.2em; color:var(--text3); margin-bottom:10px; font-weight:700; }
+  .ss-row { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-radius:8px; border:1px solid var(--border2); background:var(--bg3); margin-bottom:8px; cursor:pointer; transition:all 0.15s; }
+  .ss-row:hover { border-color:var(--amber-border); }
+  .ss-row.selected { border-color:var(--amber-border); background:var(--amber-dim); }
+  .ss-age { font-size:13px; font-weight:700; font-family:monospace; color:var(--text); }
+  .ss-note { font-size:11px; color:var(--text3); }
+  .ss-amount { font-size:13px; font-weight:700; font-family:monospace; }
+  .prog-wrap { background:var(--bg3); border-radius:999px; height:5px; overflow:hidden; margin-top:5px; width:100px; }
+  .prog-bar { height:100%; border-radius:999px; }
+  .run-btn { background:var(--amber); color:#1c1917; border:none; border-radius:8px; padding:11px 28px; font-size:13px; font-weight:700; cursor:pointer; transition:opacity 0.2s; margin-bottom:20px; }
+  .run-btn:hover { opacity:0.85; }
+  .run-btn:disabled { opacity:0.5; cursor:not-allowed; }
+  .mc-wrap { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:16px; margin-bottom:20px; }
+  canvas { display:block; }
+  .mc-legend { display:flex; gap:16px; margin-top:10px; flex-wrap:wrap; }
+  .mc-legend-item { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text2); }
+  .mc-legend-dot { width:16px; height:4px; border-radius:2px; }
+  .disclaimer { margin-top:32px; padding-top:16px; border-top:1px solid var(--border2); text-align:center; font-size:11px; color:var(--text3); line-height:1.6; }
+  @media (max-width:520px) {
+    .grid2,.stats { grid-template-columns:1fr; }
+    .stats3,.stats4 { grid-template-columns:1fr 1fr; }
+    .col2 { grid-column:span 1; }
+    .tab-btn { font-size:9px; }
+    .catchup-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <div style="max-width:720px;margin:0 auto;">
+    <div class="header-eyebrow">Retirement Intelligence</div>
+    <h1>Your Retirement Strategist</h1>
+  </div>
+</div>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(0)">401k/Roth</button>
+    <button class="tab-btn" onclick="switchTab(1)">RMD Planner</button>
+    <button class="tab-btn" onclick="switchTab(2)">Tax Optimizer</button>
+    <button class="tab-btn" onclick="switchTab(3)">ACA Strategy</button>
+    <button class="tab-btn" onclick="switchTab(4)">Soc. Security</button>
+    <button class="tab-btn" onclick="switchTab(5)">Monte Carlo</button>
+    <button class="tab-btn" onclick="switchTab(6)">Can I Retire?</button>
+  </div>
+
+  <!-- 401k/Roth -->
+  <div class="panel active" id="panel-0">
+    <div class="grid2">
+      <div class="field"><label>Current Age</label><input type="number" id="r-age" value="58" oninput="updateRoth()"></div>
+      <div class="field"><label>Retirement Age</label><input type="number" id="r-retage" value="65" oninput="updateRoth()"></div>
+      <div class="field"><label>401k Balance ($)</label><input type="number" id="r-balance" value="500000" oninput="updateRoth()"></div>
+      <div class="field"><label>Current Annual Income ($)</label><input type="number" id="r-income" value="80000" oninput="updateRoth()"></div>
+      <div class="field"><label>Conversion Amount ($)</label><input type="number" id="r-convert" value="30000" oninput="updateRoth()"></div>
+      <div class="field"><label>Annual Growth Rate (%)</label><input type="number" id="r-growth" value="6" oninput="updateRoth()"></div>
+    </div>
+    <div class="stats" id="roth-stats"></div>
+    <div class="box">
+      <div class="box-header"><span class="box-title">Conversion Verdict</span><span id="roth-badge"></span></div>
+      <div id="roth-insights"></div>
+    </div>
+  </div>
+
+  <!-- RMD -->
+  <div class="panel" id="panel-1">
+    <div class="grid2">
+      <div class="field"><label>Current Age</label><input type="number" id="rmd-age" value="68" oninput="updateRMD()"></div>
+      <div class="field"><label>401k/IRA Balance ($)</label><input type="number" id="rmd-balance" value="800000" oninput="updateRMD()"></div>
+      <div class="field"><label>Annual Growth Rate (%)</label><input type="number" id="rmd-growth" value="5" oninput="updateRMD()"></div>
+      <div class="field"><label>Annual SS Income ($)</label><input type="number" id="rmd-ss" value="24000" oninput="updateRMD()"></div>
+      <div class="field col2"><label>Other Annual Income ($)</label><input type="number" id="rmd-other" value="20000" oninput="updateRMD()"></div>
+    </div>
+    <div class="stats stats3" id="rmd-stats"></div>
+    <div class="section-label">RMD Schedule Projection</div>
+    <div class="table-wrap"><table id="rmd-table"></table></div>
+    <div id="rmd-insights"></div>
+  </div>
+
+  <!-- Tax Optimizer -->
+  <div class="panel" id="panel-2">
+    <div class="grid2">
+      <div class="field"><label>Age</label><input type="number" id="t-age" value="55" oninput="updateTax()"></div>
+      <div class="field"><label>Gross Annual Income ($)</label><input type="number" id="t-income" value="95000" oninput="updateTax()"></div>
+      <div class="field"><label>401k Contribution ($)</label><input type="number" id="t-401k" value="23000" oninput="updateTax()"><div class="input-hint" id="t-401k-hint"></div></div>
+      <div class="field"><label>HSA Contribution ($)</label><input type="number" id="t-hsa" value="4150" oninput="updateTax()"><div class="input-hint" id="t-hsa-hint"></div></div>
+    </div>
+    <div class="stats" id="tax-stats"></div>
+    <div class="catchup-box" id="catchup-box" style="display:none">
+      <div class="catchup-title">Catch-Up Contribution Bonus</div>
+      <div class="catchup-grid" id="catchup-grid"></div>
+    </div>
+    <div class="section-label">Tax Reduction Strategies</div>
+    <div id="tax-insights"></div>
+  </div>
+
+  <!-- ACA -->
+  <div class="panel" id="panel-3">
+    <div class="grid2">
+      <div class="field"><label>Age</label><input type="number" id="aca-age" value="60" oninput="updateACA()"></div>
+      <div class="field"><label>Household Size</label>
+        <select id="aca-size" onchange="updateACA()">
+          <option value="1">1 person</option>
+          <option value="2" selected>2 people</option>
+          <option value="3">3 people</option>
+          <option value="4">4 people</option>
+          <option value="5">5 people</option>
+        </select>
+      </div>
+      <div class="field col2"><label>Estimated MAGI ($)</label><input type="number" id="aca-magi" value="55000" oninput="updateACA()"><div class="input-hint">MAGI = AGI + tax-exempt interest + excluded foreign income</div></div>
+    </div>
+    <div class="box">
+      <div class="box-header"><span class="box-title">Your ACA Position</span><span id="aca-badge"></span></div>
+      <div class="stats stats3" id="aca-stats" style="margin-bottom:12px;"></div>
+      <div id="aca-desc" style="font-size:12px;color:var(--text2);line-height:1.6;"></div>
+    </div>
+    <div class="section-label">Income Sweet Spots</div>
+    <div id="aca-spots" style="margin-bottom:20px;"></div>
+    <div class="section-label">Strategies</div>
+    <div id="aca-insights"></div>
+  </div>
+
+  <!-- Social Security -->
+  <div class="panel" id="panel-4">
+    <div class="grid2">
+      <div class="field"><label>Current Age</label><input type="number" id="ss-age" value="58" oninput="updateSS()"></div>
+      <div class="field"><label>Full Retirement Age (FRA)</label>
+        <select id="ss-fra" onchange="updateSS()">
+          <option value="66">66 (born 1943-1954)</option>
+          <option value="66.5">66 + 6 months</option>
+          <option value="67" selected>67 (born 1960+)</option>
+        </select>
+      </div>
+      <div class="field"><label>Your Monthly Benefit at FRA ($)</label><input type="number" id="ss-fra-ben" value="2400" oninput="updateSS()"></div>
+      <div class="field"><label>Spouse Monthly Benefit at FRA ($)</label><input type="number" id="ss-spouse" value="1200" oninput="updateSS()"><div class="input-hint">Enter 0 if no spouse</div></div>
+      <div class="field"><label>Planned Claim Age</label>
+        <select id="ss-claim" onchange="updateSS()">
+          <option value="62">62 (earliest)</option>
+          <option value="63">63</option>
+          <option value="64">64</option>
+          <option value="65">65</option>
+          <option value="66">66</option>
+          <option value="67" selected>67 (FRA)</option>
+          <option value="68">68</option>
+          <option value="69">69</option>
+          <option value="70">70 (maximum)</option>
+        </select>
+      </div>
+      <div class="field"><label>Other Annual Retirement Income ($)</label><input type="number" id="ss-other" value="40000" oninput="updateSS()"></div>
+    </div>
+    <div class="stats stats4" id="ss-stats"></div>
+    <div class="section-label">Benefit Comparison by Claim Age (click to select)</div>
+    <div id="ss-timeline" style="margin-bottom:20px;"></div>
+    <div class="section-label">Breakeven Analysis</div>
+    <div class="box" id="ss-breakeven" style="margin-bottom:20px;"></div>
+    <div id="ss-insights"></div>
+  </div>
+
+  <!-- Monte Carlo -->
+  <div class="panel" id="panel-5">
+    <div class="grid2">
+      <div class="field"><label>Current Age</label><input type="number" id="mc-age" value="55"></div>
+      <div class="field"><label>Retirement Age</label><input type="number" id="mc-retage" value="65"></div>
+      <div class="field"><label>Current Portfolio ($)</label><input type="number" id="mc-balance" value="500000"></div>
+      <div class="field"><label>Annual Contribution ($)</label><input type="number" id="mc-contrib" value="20000"></div>
+      <div class="field"><label>Annual Withdrawal in Retirement ($)</label><input type="number" id="mc-withdraw" value="60000"></div>
+      <div class="field"><label>Social Security Income ($)</label><input type="number" id="mc-ss" value="24000"></div>
+      <div class="field"><label>Expected Annual Return (%)</label><input type="number" id="mc-return" value="7"></div>
+      <div class="field"><label>Volatility / Std Dev (%)</label><input type="number" id="mc-vol" value="12"><div class="input-hint">~10% conservative, ~15% aggressive</div></div>
+      <div class="field"><label>Inflation Rate (%)</label><input type="number" id="mc-inflation" value="3"></div>
+      <div class="field"><label>Plan to Age</label><input type="number" id="mc-end" value="90"></div>
+    </div>
+    <button class="run-btn" id="mc-btn" onclick="runMC()">Run 1,000 Simulations</button>
+    <div class="stats stats3" id="mc-stats" style="display:none;margin-bottom:20px;"></div>
+    <div class="mc-wrap" id="mc-wrap" style="display:none;">
+      <div class="section-label">Portfolio Paths -- 1,000 Simulations</div>
+      <canvas id="mc-canvas" height="280"></canvas>
+      <div class="mc-legend">
+        <div class="mc-legend-item"><div class="mc-legend-dot" style="background:#34d399;"></div>90th percentile</div>
+        <div class="mc-legend-item"><div class="mc-legend-dot" style="background:#f59e0b;"></div>Median (50th)</div>
+        <div class="mc-legend-item"><div class="mc-legend-dot" style="background:#f87171;"></div>10th percentile</div>
+        <div class="mc-legend-item"><div class="mc-legend-dot" style="background:rgba(248,113,113,0.15);width:24px;height:12px;"></div>Depleted zone</div>
+      </div>
+    </div>
+    <div id="mc-insights" style="margin-top:20px;"></div>
+  </div>
+
+  <!-- Can I Retire? -->
+  <div class="panel" id="panel-6">
+
+    <!-- Verdict Banner -->
+    <div id="cir-banner" style="border-radius:14px;padding:20px 20px 16px;margin-bottom:24px;border:2px solid;transition:all 0.3s;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.2em;font-weight:700;margin-bottom:6px;opacity:0.7;" id="cir-banner-label">Retirement Readiness</div>
+      <div style="font-size:28px;font-weight:800;font-family:Georgia,serif;margin-bottom:4px;" id="cir-banner-verdict"></div>
+      <div style="font-size:13px;opacity:0.75;" id="cir-banner-sub"></div>
+    </div>
+
+    <!-- Inputs: Who You Are -->
+    <div class="section-label">About You</div>
+    <div class="grid2" style="margin-bottom:20px;">
+      <div class="field"><label>Current Age</label><input type="number" id="cir-age" value="60" oninput="updateCIR()"></div>
+      <div class="field"><label>Target Retirement Age</label><input type="number" id="cir-retage" value="65" oninput="updateCIR()"></div>
+      <div class="field"><label>Life Expectancy (plan to age)</label><input type="number" id="cir-life" value="90" oninput="updateCIR()"></div>
+      <div class="field"><label>Marital Status</label>
+        <select id="cir-marital" onchange="updateCIR()">
+          <option value="single">Single</option>
+          <option value="married" selected>Married</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Inputs: Assets & Income -->
+    <div class="section-label">Assets &amp; Income Sources</div>
+    <div class="grid2" style="margin-bottom:20px;">
+      <div class="field"><label>401k / IRA Balance ($)</label><input type="number" id="cir-401k" value="650000" oninput="updateCIR()"></div>
+      <div class="field"><label>Roth IRA Balance ($)</label><input type="number" id="cir-roth" value="80000" oninput="updateCIR()"><div class="input-hint">Tax-free in retirement</div></div>
+      <div class="field"><label>Taxable Brokerage ($)</label><input type="number" id="cir-brokerage" value="50000" oninput="updateCIR()"></div>
+      <div class="field"><label>Cash / Emergency Fund ($)</label><input type="number" id="cir-cash" value="30000" oninput="updateCIR()"></div>
+      <div class="field"><label>Annual Social Security ($)</label><input type="number" id="cir-ss" value="24000" oninput="updateCIR()"><div class="input-hint">Enter 0 if not yet estimated</div></div>
+      <div class="field"><label>Annual Pension Income ($)</label><input type="number" id="cir-pension" value="0" oninput="updateCIR()"></div>
+      <div class="field"><label>Annual Rental / Other Income ($)</label><input type="number" id="cir-other" value="0" oninput="updateCIR()"></div>
+      <div class="field"><label>Expected Portfolio Return (%)</label><input type="number" id="cir-return" value="6" oninput="updateCIR()"></div>
+    </div>
+
+    <!-- Inputs: Expenses -->
+    <div class="section-label">Annual Expenses in Retirement</div>
+    <div class="grid2" style="margin-bottom:20px;">
+      <div class="field"><label>Housing (mortgage/rent/taxes) ($)</label><input type="number" id="cir-housing" value="18000" oninput="updateCIR()"></div>
+      <div class="field"><label>Food &amp; Groceries ($)</label><input type="number" id="cir-food" value="9600" oninput="updateCIR()"></div>
+      <div class="field"><label>Transportation ($)</label><input type="number" id="cir-transport" value="6000" oninput="updateCIR()"></div>
+      <div class="field"><label>Travel &amp; Leisure ($)</label><input type="number" id="cir-travel" value="8000" oninput="updateCIR()"></div>
+      <div class="field"><label>Utilities &amp; Phone ($)</label><input type="number" id="cir-utilities" value="4800" oninput="updateCIR()"></div>
+      <div class="field"><label>Subscriptions &amp; Misc ($)</label><input type="number" id="cir-misc" value="3600" oninput="updateCIR()"></div>
+      <div class="field"><label>Debt Payments ($)</label><input type="number" id="cir-debt" value="0" oninput="updateCIR()"><div class="input-hint">Mortgages, loans, credit cards</div></div>
+      <div class="field"><label>Out-of-Pocket Medical ($)</label><input type="number" id="cir-medical" value="4000" oninput="updateCIR()"><div class="input-hint">Copays, prescriptions, dental, vision</div></div>
+    </div>
+
+    <!-- Healthcare Section -->
+    <div class="section-label">Healthcare Coverage</div>
+    <div class="grid2" style="margin-bottom:20px;">
+      <div class="field"><label>Healthcare Coverage</label>
+        <select id="cir-hc-type" onchange="updateCIR()">
+          <option value="employer">Still on employer plan</option>
+          <option value="aca" selected>ACA Marketplace plan</option>
+          <option value="cobra">COBRA (temporary)</option>
+          <option value="medicare">Medicare (age 65+)</option>
+          <option value="spouse">Spouse employer plan</option>
+        </select>
+      </div>
+      <div class="field"><label>Monthly Premium ($)</label><input type="number" id="cir-premium" value="650" oninput="updateCIR()"><div class="input-hint">Your out-of-pocket premium cost</div></div>
+      <div class="field"><label>Annual Deductible ($)</label><input type="number" id="cir-deductible" value="3000" oninput="updateCIR()"></div>
+      <div class="field"><label>Annual Max Out-of-Pocket ($)</label><input type="number" id="cir-oop" value="7000" oninput="updateCIR()"></div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="stats stats4" id="cir-stats" style="margin-bottom:20px;"></div>
+
+    <!-- Expense Breakdown -->
+    <div class="section-label">Expense Breakdown</div>
+    <div class="box" id="cir-expense-box" style="margin-bottom:20px;"></div>
+
+    <!-- Runway / Gap Analysis -->
+    <div class="section-label">Retirement Runway Analysis</div>
+    <div class="box" id="cir-runway-box" style="margin-bottom:20px;"></div>
+
+    <!-- What-If Scenarios -->
+    <div class="section-label">What-If Scenarios</div>
+    <div id="cir-scenarios" style="margin-bottom:20px;"></div>
+
+    <!-- Checklist -->
+    <div class="section-label">Retirement Readiness Checklist</div>
+    <div id="cir-checklist" style="margin-bottom:20px;"></div>
+
+    <!-- Insights -->
+    <div id="cir-insights"></div>
+  </div>
+
+  <div class="disclaimer">Educational tool only. Not financial, tax, or legal advice. Consult a qualified financial advisor or CPA for your specific situation.</div>
+</div>
+
+<script>
+const BRACKETS=[
+  {min:0,max:11600,rate:0.10,label:"10%"},
+  {min:11600,max:47150,rate:0.12,label:"12%"},
+  {min:47150,max:100525,rate:0.22,label:"22%"},
+  {min:100525,max:191950,rate:0.24,label:"24%"},
+  {min:191950,max:243725,rate:0.32,label:"32%"},
+  {min:243725,max:609350,rate:0.35,label:"35%"},
+  {min:609350,max:Infinity,rate:0.37,label:"37%"},
+];
+const RMD_TBL={72:27.4,73:26.5,74:25.5,75:24.6,76:23.7,77:22.9,78:22.0,79:21.1,80:20.2,81:19.4,82:18.5,83:17.7,84:16.8,85:16.0,86:15.2,87:14.4,88:13.7,89:12.9,90:12.2,91:11.5,92:10.8,93:10.1,94:9.5,95:8.9};
+const FPL={1:15060,2:20440,3:25820,4:31200,5:36580};
+
+function calcTax(inc){let t=0,p=0;for(const b of BRACKETS){if(inc<=p)break;t+=(Math.min(inc,b.max)-p)*b.rate;p=b.max;}return t;}
+function marginal(inc){for(const b of BRACKETS)if(inc<=b.max)return b;return BRACKETS[BRACKETS.length-1];}
+function calcRMD(bal,age){const a=Math.min(Math.max(age,72),95);return RMD_TBL[a]?bal/RMD_TBL[a]:null;}
+function fmt(n){return Math.round(n).toLocaleString();}
+function fmtK(n){return(n/1000).toFixed(0)+'k';}
+function sc(lbl,val,sub,cls){return '<div class="stat '+(cls||'')+'"><div class="stat-label">'+lbl+'</div><div class="stat-value">'+val+'</div>'+(sub?'<div class="stat-sub">'+sub+'</div>':'')+'</div>';}
+function ins(col,ttl,body){return '<div class="insight '+col+'"><div class="insight-dot"></div><div><div class="insight-title">'+ttl+'</div><div class="insight-body">'+body+'</div></div></div>';}
+function bdg(txt,col){return '<span class="badge '+col+'">'+txt+'</span>';}
+function switchTab(i){document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('active',i===j));document.querySelectorAll('.tab-btn').forEach((b,j)=>b.classList.toggle('active',i===j));}
+
+// 401k/Roth
+function updateRoth(){
+  const age=+document.getElementById('r-age').value||58;
+  const bal=+document.getElementById('r-balance').value||500000;
+  const inc=+document.getElementById('r-income').value||80000;
+  const conv=+document.getElementById('r-convert').value||30000;
+  const gr=+document.getElementById('r-growth').value||6;
+  const tot=inc+conv;
+  const cost=calcTax(tot)-calcTax(inc);
+  const eff=conv>0?cost/conv:0;
+  const mg=marginal(tot);
+  const mb=marginal(inc);
+  const yrs=Math.max(0,73-age);
+  const proj=bal*Math.pow(1+gr/100,yrs);
+  const rmd=calcRMD(proj,73);
+  const go=mb.rate<0.24&&yrs>3;
+  document.getElementById('roth-stats').innerHTML=
+    sc('Tax on Conversion','$'+fmt(cost),'Effective: '+(eff*100).toFixed(1)+'%')+
+    sc('Marginal Bracket',mg.label,'After-conversion income: $'+fmt(tot),'accent')+
+    sc('Years Until RMD',yrs===0?'Active Now':yrs+' years','RMDs begin at age 73')+
+    sc('Est. RMD at 73','$'+fmt(rmd||0)+'/yr','On $'+fmt(proj)+' projected');
+  document.getElementById('roth-badge').innerHTML=bdg(go?'Convert Now':'Wait / Partial',go?'green':'amber');
+  let i='';
+  if(go){i+=ins('green','Good conversion window','You are in the '+mb.label+' bracket with '+yrs+' years before RMDs. Converting now locks in today\'s lower rates.');i+=ins('amber','Bracket ceiling tip','Do not convert past your '+mb.label+' ceiling ($'+fmt(mb.max)+'). Converting $'+fmt(mb.max-inc)+' more fills it efficiently.');}
+  else{i+=ins('amber','Higher bracket risk','Adding $'+fmt(conv)+' pushes you into the '+mg.label+' bracket. Consider converting only to the '+mb.label+' ceiling ($'+fmt(mb.max)+').');i+=ins('blue','Strategic partial conversion','Small conversions in low-income years between retirement and Social Security can be highly tax-efficient.');}
+  i+=ins('blue','5-year Roth rule','Converted funds must stay in Roth for 5 years before tax-free withdrawal. Plan accordingly if you are within 5 years of needing the funds.');
+  document.getElementById('roth-insights').innerHTML=i;
+}
+
+// RMD
+function updateRMD(){
+  const curAge=+document.getElementById('rmd-age').value||68;
+  const bal=+document.getElementById('rmd-balance').value||800000;
+  const gr=+document.getElementById('rmd-growth').value||5;
+  const ss=+document.getElementById('rmd-ss').value||24000;
+  const oth=+document.getElementById('rmd-other').value||20000;
+  const rows=[];let b=bal;
+  for(let age=Math.max(curAge,63);age<=90;age++){
+    const rmd=age>=73?calcRMD(b,age):null;
+    const ti=(rmd||0)+(age>=62?ss:0)+oth;
+    const tax=rmd?calcTax(ti):null;
+    const brk=rmd?marginal(ti):null;
+    rows.push({age,bal:Math.round(b),rmd:rmd?Math.round(rmd):null,ti:Math.round(ti),tax:tax?Math.round(tax):null,brk});
+    b=rmd?(b-rmd)*(1+gr/100):b*(1+gr/100);
+  }
+  const first=rows.find(r=>r.rmd);
+  document.getElementById('rmd-stats').innerHTML=!first?'':sc('First RMD Age','73','SECURE 2.0 Act','accent')+sc('First RMD Amount','$'+fmt(first.rmd),'Balance: $'+fmt(first.bal))+sc('First RMD Tax','$'+fmt(first.tax),'Bracket: '+first.brk.label);
+  let th='<tr>'+['Age','Balance','RMD','Total Income','Est. Tax','Bracket'].map(h=>'<th>'+h+'</th>').join('')+'</tr>';
+  let tb=rows.map(r=>{const bc=r.brk?(r.brk.rate>=0.24?'bh':r.brk.rate>=0.22?'bm':'bl'):'';return '<tr><td class="'+(r.age===73?'hl':'')+'">'+r.age+'</td><td>$'+fmtK(r.bal)+'</td><td class="'+(r.rmd?'hl':'muted')+'">'+(r.rmd?'$'+fmt(r.rmd):'--')+'</td><td>'+(r.rmd?'$'+fmt(r.ti):'--')+'</td><td>'+(r.tax?'$'+fmt(r.tax):'--')+'</td><td>'+(r.brk?'<span class="bp '+bc+'">'+r.brk.label+'</span>':'--')+'</td></tr>';}).join('');
+  document.getElementById('rmd-table').innerHTML='<thead>'+th+'</thead><tbody>'+tb+'</tbody>';
+  document.getElementById('rmd-insights').innerHTML=ins('amber','Penalty for missing RMDs','The IRS imposes a 25% excise tax on any RMD not withdrawn on time (reduced to 10% if corrected within 2 years). Always withdraw before Dec 31.')+ins('blue','QCD strategy','If you are 70.5+, Qualified Charitable Distributions up to $105,000/year count toward your RMD and are excluded from income.')+ins('green','Still working exception','If still employed at 73+, you may delay RMDs from your current employer\'s 401k (but not IRAs).');
+}
+
+// Tax
+function updateTax(){
+  const age=+document.getElementById('t-age').value||55;
+  const inc=+document.getElementById('t-income').value||95000;
+  const c401=+document.getElementById('t-401k').value||23000;
+  const hsa=+document.getElementById('t-hsa').value||4150;
+  const std=14600;
+  const lim401=age>=60&&age<=63?34250:age>=50?31000:23000;
+  const hsaLim=age>=55?5150:4150;
+  const super60=age>=60&&age<=63;
+  document.getElementById('t-401k-hint').textContent='Max: $'+lim401.toLocaleString();
+  document.getElementById('t-hsa-hint').textContent='Max: $'+hsaLim.toLocaleString();
+  const taxable=Math.max(0,inc-c401-hsa-std);
+  const tax=calcTax(taxable);
+  const eff=inc>0?(tax/inc)*100:0;
+  const brk=marginal(taxable);
+  const room=(lim401-c401)+(hsaLim-hsa);
+  document.getElementById('tax-stats').innerHTML=sc('Taxable Income','$'+fmt(taxable),'After deductions')+sc('Est. Federal Tax','$'+fmt(tax),'Effective rate: '+eff.toFixed(1)+'%','accent')+sc('Marginal Bracket',brk.label,'Your top rate')+sc('Room to Reduce Tax','$'+fmt(Math.max(0,room)),'More you could shelter');
+  const cb=document.getElementById('catchup-box');
+  if(age>=50){
+    cb.style.display='block';
+    let h='<div><div class="catchup-label">401k Catch-Up (50-59, 64+)</div><div class="catchup-value">+$8,000/yr</div></div><div><div class="catchup-label">HSA Catch-Up (55+)</div><div class="catchup-value">+$1,000/yr</div></div>';
+    if(super60)h+='<div style="grid-column:span 2"><div class="catchup-label">Ages 60-63 Super Catch-Up (SECURE 2.0)</div><div class="catchup-value green">+$11,250/yr</div></div>';
+    document.getElementById('catchup-grid').innerHTML=h;
+  }else{cb.style.display='none';}
+  document.getElementById('tax-insights').innerHTML=ins('green','Maximize HSA -- triple tax advantage','HSA contributions are pre-tax, grow tax-free, and withdraw tax-free for medical. After 65, withdraw for any reason at ordinary income rates. Best account in the tax code.')+ins('blue','Traditional vs Roth 401k','In the '+brk.label+' bracket, traditional 401k saves you '+brk.label+' now. If you expect a lower bracket in retirement, traditional wins. In 12% or lower, Roth is often better.')+ins('amber','Tax-loss harvesting','Offset capital gains with investment losses. Up to $3,000/year offsets ordinary income, with unlimited carryforward.')+ins('amber','Roth IRA income limits 2024','Phase out $146k-$161k single or $230k-$240k married. Above that, use the Backdoor Roth IRA strategy.');
+}
+
+// ACA
+function updateACA(){
+  const age=+document.getElementById('aca-age').value||60;
+  const sz=+document.getElementById('aca-size').value||2;
+  const magi=+document.getElementById('aca-magi').value||55000;
+  const fpl=FPL[Math.min(sz,5)];
+  const pct=(magi/fpl)*100;
+  const cap=magi*0.085/12;
+  let zone='',col='amber',desc='';
+  if(pct<100){zone='Medicaid territory';col='blue';desc='Below 100% FPL. In most states you qualify for Medicaid. Non-expansion states may leave you in the coverage gap.';}
+  else if(pct<150){zone='Benchmark plan = $0';col='green';desc='100-150% FPL. Silver plan premium is $0/month with maximum cost-sharing reductions. Best ACA zone.';}
+  else if(pct<200){zone='Excellent subsidies + CSR';col='green';desc='150-200% FPL. Strong credits and enhanced cost-sharing reductions. Enroll in a Silver plan.';}
+  else if(pct<250){zone='Good subsidies';col='green';desc='200-250% FPL. Good tax credits and moderate CSR on Silver. Compare silver vs bronze carefully.';}
+  else if(pct<400){zone='Moderate subsidies';col='amber';desc='250-400% FPL. Credits apply but smaller. Cap premium at 8.5% of MAGI.';}
+  else if(pct<500){zone='Subsidy eligible (ARP)';col='amber';desc='400%+ FPL. ARP extensions cap your premium at 8.5% of MAGI on the benchmark plan.';}
+  else{zone='Above subsidy cliff';col='red';desc='Very high income -- subsidies may phase out. Consider income management strategies.';}
+  document.getElementById('aca-badge').innerHTML=bdg(zone,col);
+  document.getElementById('aca-stats').innerHTML=sc('FPL %',pct.toFixed(0)+'%','FPL = $'+fpl.toLocaleString(),(pct>=100&&pct<400?'accent':''))+sc('2024 FPL','$'+fpl.toLocaleString(),sz+'-person household')+sc('Max Monthly Premium','$'+fmt(cap),'8.5% MAGI cap');
+  document.getElementById('aca-desc').textContent=desc;
+  const spots=[{l:'138% FPL (Medicaid edge)',i:Math.round(fpl*1.38)},{l:'150% FPL ($0 premium)',i:Math.round(fpl*1.50)},{l:'200% FPL',i:Math.round(fpl*2.00)},{l:'250% FPL',i:Math.round(fpl*2.50)},{l:'400% FPL (old cliff)',i:Math.round(fpl*4.00)}];
+  document.getElementById('aca-spots').innerHTML=spots.map(s=>{const near=Math.abs(s.i-magi)<5000;const diff=s.i-magi;return '<div class="sweetspot'+(near?' near':'')+'"><div><span class="sweetspot-label">'+s.l+'</span>'+(near?' '+bdg('Near you','amber'):'')+'</div><div style="display:flex;align-items:center;"><span class="sweetspot-value">$'+s.i.toLocaleString()+'</span>'+(diff>0&&diff<20000?'<span class="sweetspot-gap">down $'+fmt(diff)+' to reach</span>':'')+'</div></div>';}).join('');
+  let i=ins('green','MAGI reduction tools','Traditional 401k, IRA, HSA contributions reduce MAGI. Moving into a better FPL band can be worth thousands.')+ins('amber','Capital gains timing','Capital gains count toward MAGI. Defer realizing gains near a subsidy cliff. Even $1 over can cost significant subsidy dollars.')+ins('blue','Silver plan priority for CSR','CSR reductions ONLY available on Silver plans. At 100-250% FPL, Silver is almost always the best value.')+ins('red','Avoid clawback trap','Underestimate income = repay excess credits at tax time. Reconcile mid-year if income changes.');
+  if(age>=60)i+=ins('green','Age 60+ premium boost','ACA allows 3x rate for older enrollees. Your subsidy covers this -- at 60+, your premium tax credit dollar value is substantially higher.');
+  document.getElementById('aca-insights').innerHTML=i;
+}
+
+// Social Security
+function updateSS(){
+  const fra=+document.getElementById('ss-fra').value||67;
+  const fraB=+document.getElementById('ss-fra-ben').value||2400;
+  const spouse=+document.getElementById('ss-spouse').value||0;
+  const claimAge=+document.getElementById('ss-claim').value||67;
+  const other=+document.getElementById('ss-other').value||40000;
+
+  function benAt(a){
+    if(a<fra){const me=(fra-a)*12;const red=me<=36?me*(5/9/100):(36*(5/9/100))+((me-36)*(5/12/100));return fraB*(1-red);}
+    return fraB*(1+(a-fra)*12*0.0067);
+  }
+
+  const ben=benAt(claimAge);
+  const annual=ben*12;
+  const spouseBen=spouse>0?Math.max(spouse,fraB*0.5)*(claimAge<67?Math.max(0.65,1-(67-claimAge)*12*0.0208):1)*12:0;
+  const combined=(annual+spouseBen)/12;
+
+  const provInc=other+annual*0.5;
+  let ssTax=0;
+  if(provInc>44000)ssTax=annual*0.85;
+  else if(provInc>34000)ssTax=annual*0.50;
+
+  document.getElementById('ss-stats').innerHTML=
+    sc('Monthly at Age '+claimAge,'$'+fmt(ben),'Annual: $'+fmt(annual),'accent')+
+    sc('vs FRA Benefit',((ben/fraB-1)*100>=0?'+':'')+((ben/fraB-1)*100).toFixed(1)+'%',claimAge<fra?'Reduced -- early claim':'Bonus -- delayed claim',claimAge>=fra?'gc':'rc')+
+    sc('Taxable Portion','$'+fmt(ssTax),provInc>44000?'85% included (high income)':provInc>34000?'Up to 50% included':'Below taxable threshold',ssTax>0?'amber':'')+
+    sc('Household Monthly','$'+fmt(combined),spouse>0?'With spouse benefit':'Your benefit only','bc');
+
+  const ages=[62,63,64,65,66,67,68,69,70];
+  const maxB=benAt(70);
+  document.getElementById('ss-timeline').innerHTML=ages.map(a=>{
+    const b=benAt(a);
+    const pct=(b/maxB)*100;
+    const sel=a===claimAge;
+    const color=a>=70?'var(--green)':a===fra?'var(--blue)':a<=62?'var(--red)':'var(--amber-light)';
+    const notePct=((b/fraB-1)*100);
+    const note=a<fra?'Reduced '+(notePct).toFixed(1)+'%':a===fra?'Full benefit (FRA)':'Delayed bonus +'+notePct.toFixed(1)+'%';
+    return '<div class="ss-row'+(sel?' selected':'')+'" onclick="document.getElementById(\'ss-claim\').value='+a+';updateSS()"><div><div class="ss-age">Age '+a+(a===fra?' (FRA)':''+(sel?' selected':''))+'</div><div class="ss-note">'+note+'</div></div><div style="text-align:right;"><div class="ss-amount" style="color:'+color+'">$'+fmt(b)+'/mo</div><div class="prog-wrap"><div class="prog-bar" style="width:'+pct+'%;background:'+color+';"></div></div></div></div>';
+  }).join('');
+
+  // Breakeven
+  const ben62=benAt(62);
+  let bHtml='';
+  if(claimAge>62){
+    const diff=ben-ben62;
+    const forgone=ben62*(claimAge-62)*12;
+    const be=diff>0?forgone/(diff*12)+claimAge:999;
+    bHtml='<div class="stats" style="margin-bottom:12px;">'+sc('Breakeven vs Age 62','Age '+be.toFixed(0),'When cumulative totals equal out','accent')+sc('Extra Per Month','+$'+fmt(diff),'vs claiming at 62','gc')+'</div>';
+    bHtml+=be<=82?ins('green','Breakeven at '+be.toFixed(0)+' is achievable','Most retirees live past this age. If you expect to live to '+be.toFixed(0)+'+, waiting to '+claimAge+' pays off. Women average ~85, men ~83 at 65.'):ins('amber','Long breakeven at age '+be.toFixed(0),'You need to outlive this age to benefit from waiting. Consider your health, family history, and whether you need the income now.');
+  }else{bHtml=ins('red','You selected the earliest age (62)','Claiming at 62 permanently reduces your benefit by ~25-30%. Makes sense if you have health concerns, need income now, or have a shorter life expectancy.');}
+  document.getElementById('ss-breakeven').innerHTML=bHtml;
+
+  let i='';
+  if(claimAge<fra){i+=ins('red','Early claiming is permanent','Benefits claimed before FRA are reduced for life -- and survivor benefits are also reduced. Only claim early if you truly need the income.');}
+  else if(claimAge>=70){i+=ins('green','Maximum delay strategy','Waiting to 70 gives 24-32% more than FRA for life. This is especially valuable for the higher-earning spouse as it maximizes survivor benefits.');}
+  else{i+=ins('blue','Building delayed credits','Each year past FRA adds 8% permanently. Going from 67 to 70 adds 24% for life. Bridge income from other sources to delay if possible.');}
+  i+=ins('amber','Up to 85% of SS is taxable','SS may be taxable if combined income exceeds $34,000 single or $44,000 married. Roth conversions, TFSA-equivalent accounts, and income timing can reduce this.')+ins('purple','Survivor benefit strategy','The higher earner should delay as long as possible. When one spouse dies, the survivor keeps only the larger benefit. Maximizing the higher benefit protects the surviving spouse.')+ins('blue','Windfall Elimination Provision','If you have a pension from non-SS-covered work (some government jobs), WEP may reduce your SS benefit. Check SSA.gov for your specific situation.');
+  document.getElementById('ss-insights').innerHTML=i;
+}
+
+// Monte Carlo
+function randn(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+function runMC(){
+  const age=+document.getElementById('mc-age').value||55;
+  const retAge=+document.getElementById('mc-retage').value||65;
+  const bal=+document.getElementById('mc-balance').value||500000;
+  const contrib=+document.getElementById('mc-contrib').value||20000;
+  const withdraw=+document.getElementById('mc-withdraw').value||60000;
+  const ss=+document.getElementById('mc-ss').value||24000;
+  const mean=(+document.getElementById('mc-return').value||7)/100;
+  const vol=(+document.getElementById('mc-vol').value||12)/100;
+  const inf=(+document.getElementById('mc-inflation').value||3)/100;
+  const endAge=+document.getElementById('mc-end').value||90;
+
+  const btn=document.getElementById('mc-btn');
+  btn.disabled=true;btn.textContent='Running...';
+
+  setTimeout(()=>{
+    const N=1000,totalYrs=endAge-age,retIn=retAge-age;
+    const allP=[];let fails=0;
+
+    for(let s=0;s<N;s++){
+      let p=bal,path=[p],failed=false,aw=withdraw,as=ss;
+      for(let y=0;y<totalYrs;y++){
+        const r=mean+vol*randn();
+        if(y<retIn){p=p*(1+r)+contrib;}
+        else{aw*=(1+inf);as*=(1+0.023);const net=Math.max(0,aw-as);p=p*(1+r)-net;if(p<=0&&!failed){failed=true;fails++;}p=Math.max(0,p);}
+        path.push(Math.round(p));
+      }
+      allP.push(path);
+    }
+
+    const yrs=totalYrs+1,p10=[],p50=[],p90=[];
+    for(let y=0;y<yrs;y++){const vals=allP.map(p=>p[y]).sort((a,b)=>a-b);p10.push(vals[Math.floor(N*0.10)]);p50.push(vals[Math.floor(N*0.50)]);p90.push(vals[Math.floor(N*0.90)]);}
+
+    const sr=((N-fails)/N*100).toFixed(1);
+    const medFin=p50[p50.length-1];
+    const wstFin=p10[p10.length-1];
+
+    document.getElementById('mc-stats').style.display='grid';
+    document.getElementById('mc-stats').className='stats stats3';
+    document.getElementById('mc-stats').innerHTML=
+      sc('Success Rate',sr+'%','Survives to age '+endAge,+sr>=80?'gc':+sr>=60?'accent':'rc')+
+      sc('Median Final Balance','$'+fmt(medFin),'50th percentile at age '+endAge,medFin>0?'bc':'rc')+
+      sc('Worst 10% Outcome','$'+fmt(wstFin),'10th percentile',wstFin>0?'':'rc');
+
+    // Draw chart
+    document.getElementById('mc-wrap').style.display='block';
+    const canvas=document.getElementById('mc-canvas');
+    const dpr=window.devicePixelRatio||1;
+    const W=canvas.parentElement.clientWidth-32;
+    const H=280;
+    canvas.width=W*dpr;canvas.height=H*dpr;
+    canvas.style.width=W+'px';canvas.style.height=H+'px';
+    const ctx=canvas.getContext('2d');
+    ctx.scale(dpr,dpr);
+
+    const maxV=Math.max(...p90)*1.05;
+    const pad={t:20,r:16,b:36,l:64};
+    const cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;
+    function xp(i){return pad.l+i/totalYrs*cw;}
+    function yp(v){return pad.t+ch-Math.max(0,v)/maxV*ch;}
+
+    ctx.clearRect(0,0,W,H);
+
+    // Failure zone
+    ctx.fillStyle='rgba(248,113,113,0.06)';
+    ctx.fillRect(pad.l,yp(0),cw,H-pad.b-yp(0)+pad.t);
+
+    // Grid
+    ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=1;
+    for(let i=0;i<=4;i++){const v=maxV*i/4;const y=yp(v);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cw,y);ctx.stroke();ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='10px monospace';ctx.textAlign='right';ctx.fillText('$'+fmtK(v),pad.l-4,y+4);}
+
+    // Retirement marker
+    const rx=xp(retIn);
+    ctx.strokeStyle='rgba(245,158,11,0.35)';ctx.setLineDash([4,4]);ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(rx,pad.t);ctx.lineTo(rx,H-pad.b);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='rgba(245,158,11,0.6)';ctx.font='10px monospace';ctx.textAlign='center';
+    ctx.fillText('Retire',rx,pad.t+12);
+
+    // Band
+    ctx.beginPath();
+    for(let i=0;i<yrs;i++)i===0?ctx.moveTo(xp(i),yp(p90[i])):ctx.lineTo(xp(i),yp(p90[i]));
+    for(let i=yrs-1;i>=0;i--)ctx.lineTo(xp(i),yp(p10[i]));
+    ctx.closePath();ctx.fillStyle='rgba(56,189,248,0.06)';ctx.fill();
+
+    function drawL(data,color,width){ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=width;data.forEach((v,i)=>i===0?ctx.moveTo(xp(i),yp(v)):ctx.lineTo(xp(i),yp(v)));ctx.stroke();}
+    drawL(p10,'rgba(248,113,113,0.75)',1.5);
+    drawL(p50,'rgba(245,158,11,0.9)',2);
+    drawL(p90,'rgba(52,211,153,0.75)',1.5);
+
+    // X labels
+    ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='10px monospace';ctx.textAlign='center';
+    for(let y=0;y<=totalYrs;y+=5)ctx.fillText('Age '+(age+y),xp(y),H-pad.b+14);
+
+    // Insights
+    let i='';
+    if(+sr>=90){i+=ins('green','Excellent -- '+sr+'% success rate','Your portfolio has a very high probability of lasting to age '+endAge+'. You may be able to spend more, retire earlier, or leave a larger legacy.');}
+    else if(+sr>=75){i+=ins('amber','Good but could improve -- '+sr+'% success rate','Most planners target 85-90%. Consider increasing savings, reducing withdrawal slightly, or working 1-2 additional years to close the gap.');}
+    else if(+sr>=50){i+=ins('amber','Moderate risk -- '+sr+'% success rate','Nearly half of simulations depleted the portfolio. Reduce planned spending, delay retirement, or increase your savings rate significantly.');}
+    else{i+=ins('red','High risk of depletion -- '+sr+'% success rate','More than half of simulations ran out of money. Major changes are needed: work longer, save more, or plan for significantly reduced spending.');}
+    i+=ins('blue','About this simulation','Each of the 1,000 runs uses randomly generated annual returns based on your expected return and volatility, modeling the uncertainty of real market sequences and showing a full range of outcomes.')+ins('amber','Sequence of returns risk','Getting bad returns in the first 5-10 years of retirement is far more damaging than bad returns later. This is why a cash buffer, bond allocation, and flexible spending matter near retirement.')+ins('purple','Adjusting your inputs','Reducing annual withdrawal by $5,000 or working 2 more years often improves success rate dramatically more than changing your expected return. Controllable factors matter most.');
+    document.getElementById('mc-insights').innerHTML=i;
+
+    btn.disabled=false;btn.textContent='Run 1,000 Simulations';
+  },50);
+}
+
+updateRoth();updateRMD();updateTax();updateACA();updateSS();
+
+//  Can I Retire? 
+function updateCIR(){
+  const age      = +document.getElementById('cir-age').value||60;
+  const retAge   = +document.getElementById('cir-retage').value||65;
+  const life     = +document.getElementById('cir-life').value||90;
+  const married  = document.getElementById('cir-marital').value==='married';
+
+  // Assets
+  const bal401k  = +document.getElementById('cir-401k').value||0;
+  const balRoth  = +document.getElementById('cir-roth').value||0;
+  const balBrok  = +document.getElementById('cir-brokerage').value||0;
+  const cash     = +document.getElementById('cir-cash').value||0;
+  const ssAnnual = +document.getElementById('cir-ss').value||0;
+  const pension  = +document.getElementById('cir-pension').value||0;
+  const otherInc = +document.getElementById('cir-other').value||0;
+  const retRate  = (+document.getElementById('cir-return').value||6)/100;
+
+  // Expenses
+  const housing    = +document.getElementById('cir-housing').value||0;
+  const food       = +document.getElementById('cir-food').value||0;
+  const transport  = +document.getElementById('cir-transport').value||0;
+  const travel     = +document.getElementById('cir-travel').value||0;
+  const utilities  = +document.getElementById('cir-utilities').value||0;
+  const misc       = +document.getElementById('cir-misc').value||0;
+  const debt       = +document.getElementById('cir-debt').value||0;
+  const medical    = +document.getElementById('cir-medical').value||0;
+
+  // Healthcare
+  const hcType     = document.getElementById('cir-hc-type').value;
+  const premium    = +document.getElementById('cir-premium').value||0;
+  const deductible = +document.getElementById('cir-deductible').value||0;
+  const oop        = +document.getElementById('cir-oop').value||0;
+  const annualPremium = premium * 12;
+
+  //  Core calculations 
+  const totalPortfolio = bal401k + balRoth + balBrok;
+  const totalAssets    = totalPortfolio + cash;
+  const yearsUntilRet  = Math.max(0, retAge - age);
+  const retirementYrs  = Math.max(1, life - retAge);
+  const retiringSoon   = yearsUntilRet <= 1;
+
+  // Projected portfolio at retirement (simple growth, no contributions for conservative view)
+  const projectedPortfolio = totalPortfolio * Math.pow(1 + retRate, yearsUntilRet);
+
+  // Total annual expenses
+  const baseExpenses = housing + food + transport + travel + utilities + misc + debt + medical;
+  const totalAnnualExpenses = baseExpenses + annualPremium;
+
+  // Guaranteed annual income
+  const guaranteedIncome = ssAnnual + pension + otherInc;
+
+  // Gap = what portfolio must cover
+  const portfolioGap = Math.max(0, totalAnnualExpenses - guaranteedIncome);
+
+  // Safe withdrawal amount (4% rule on projected portfolio)
+  const safeWithdrawal4 = projectedPortfolio * 0.04;
+  const safeWithdrawal35 = projectedPortfolio * 0.035;
+
+  // Coverage ratio
+  const coverageRatio = portfolioGap > 0 ? safeWithdrawal4 / portfolioGap : 999;
+
+  // How many years the portfolio lasts (simple depletion model)
+  function yearsPortfolioLasts(portfolio, annualDraw, growth) {
+    if(annualDraw <= 0) return 99;
+    let p = portfolio, y = 0;
+    while(p > 0 && y < 100){p = p*(1+growth) - annualDraw; y++;}
+    return y;
+  }
+  const portfolioYears = yearsPortfolioLasts(projectedPortfolio, portfolioGap, retRate);
+
+  // Actual safe withdrawal rate needed
+  const actualSWR = projectedPortfolio > 0 ? (portfolioGap / projectedPortfolio) * 100 : 999;
+
+  //  Verdict 
+  let verdictText, verdictSub, bannerBg, bannerBorder, bannerColor;
+  if(retiringSoon){
+    if(coverageRatio >= 1.15){
+      verdictText = 'Yes -- You Can Retire';
+      verdictSub = 'Your assets and income comfortably cover projected expenses.';
+      bannerBg='rgba(52,211,153,0.12)'; bannerBorder='rgba(52,211,153,0.5)'; bannerColor='#34d399';
+    } else if(coverageRatio >= 0.90){
+      verdictText = 'Almost -- Close to Ready';
+      verdictSub = 'You\'re within reach. Small adjustments can close the gap.';
+      bannerBg='rgba(245,158,11,0.12)'; bannerBorder='rgba(245,158,11,0.5)'; bannerColor='#f59e0b';
+    } else if(coverageRatio >= 0.70){
+      verdictText = 'Not Yet -- Meaningful Gap';
+      verdictSub = 'Your portfolio needs more time to grow, or expenses need trimming.';
+      bannerBg='rgba(245,158,11,0.12)'; bannerBorder='rgba(245,158,11,0.4)'; bannerColor='#f59e0b';
+    } else {
+      verdictText = 'Not Ready -- Significant Shortfall';
+      verdictSub = 'Major changes to savings, expenses, or timeline are needed.';
+      bannerBg='rgba(248,113,113,0.12)'; bannerBorder='rgba(248,113,113,0.45)'; bannerColor='#f87171';
+    }
+  } else {
+    if(coverageRatio >= 1.15){
+      verdictText = 'On Track to Retire at ' + retAge;
+      verdictSub = 'Projected portfolio covers expenses with comfortable margin.';
+      bannerBg='rgba(52,211,153,0.12)'; bannerBorder='rgba(52,211,153,0.5)'; bannerColor='#34d399';
+    } else if(coverageRatio >= 0.90){
+      verdictText = 'Almost on Track';
+      verdictSub = yearsUntilRet + ' years remain -- small improvements will get you there.';
+      bannerBg='rgba(245,158,11,0.12)'; bannerBorder='rgba(245,158,11,0.5)'; bannerColor='#f59e0b';
+    } else {
+      verdictText = 'Adjustments Needed';
+      verdictSub = 'Save more, cut expenses, or push retirement back to close the gap.';
+      bannerBg='rgba(248,113,113,0.12)'; bannerBorder='rgba(248,113,113,0.45)'; bannerColor='#f87171';
+    }
+  }
+
+  const banner = document.getElementById('cir-banner');
+  banner.style.background = bannerBg;
+  banner.style.borderColor = bannerBorder;
+  document.getElementById('cir-banner-verdict').style.color = bannerColor;
+  document.getElementById('cir-banner-verdict').textContent = verdictText;
+  document.getElementById('cir-banner-label').style.color = bannerColor;
+  document.getElementById('cir-banner-sub').textContent = verdictSub;
+
+  //  Key stats 
+  const swrClass = actualSWR <= 3.5 ? 'gc' : actualSWR <= 4.5 ? 'accent' : 'rc';
+  const runClass = portfolioYears >= retirementYrs ? 'gc' : portfolioYears >= retirementYrs*0.75 ? 'accent' : 'rc';
+  document.getElementById('cir-stats').innerHTML =
+    sc('Total Portfolio', '$'+fmt(projectedPortfolio), retiringSoon ? 'Current value' : 'Projected at age '+retAge) +
+    sc('Annual Expenses', '$'+fmt(totalAnnualExpenses), 'Including $'+fmt(annualPremium)+'/yr healthcare') +
+    sc('Required Withdrawal Rate', actualSWR > 50 ? 'N/A' : actualSWR.toFixed(1)+'%', '4% rule threshold is safe', swrClass) +
+    sc('Portfolio Runway', portfolioYears >= 99 ? '99+ years' : portfolioYears+' years', 'At '+retRate*100+'% return / '+fmt(portfolioGap)+'/yr draw', runClass);
+
+  //  Expense breakdown bar chart 
+  const expItems = [
+    {label:'Housing', val:housing, color:'#38bdf8'},
+    {label:'Healthcare', val:annualPremium+medical, color:'#f87171'},
+    {label:'Food', val:food, color:'#34d399'},
+    {label:'Travel', val:travel, color:'#a78bfa'},
+    {label:'Transport', val:transport, color:'#f59e0b'},
+    {label:'Utilities', val:utilities, color:'#6ee7b7'},
+    {label:'Debt', val:debt, color:'#fca5a5'},
+    {label:'Misc', val:misc, color:'#78716c'},
+  ].filter(e=>e.val>0).sort((a,b)=>b.val-a.val);
+
+  const totalExp = expItems.reduce((s,e)=>s+e.val,0)||1;
+  let expHtml = '<div style="margin-bottom:14px;">';
+  for(const e of expItems){
+    const pct = (e.val/totalExp*100).toFixed(1);
+    expHtml += `<div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+        <span style="font-size:12px;color:var(--text2);">${e.label}</span>
+        <span style="font-size:12px;font-family:monospace;color:var(--text);">$${fmt(e.val)}/yr <span style="color:var(--text3)">(${pct}%)</span></span>
+      </div>
+      <div style="background:var(--bg3);border-radius:999px;height:6px;overflow:hidden;">
+        <div style="width:${pct}%;height:100%;border-radius:999px;background:${e.color};transition:width 0.4s;"></div>
+      </div>
+    </div>`;
+  }
+  // Guaranteed income line
+  expHtml += `<div style="border-top:1px solid var(--border2);padding-top:12px;margin-top:4px;display:flex;justify-content:space-between;">
+    <span style="font-size:12px;color:var(--text2);">Guaranteed income covers</span>
+    <span style="font-size:12px;font-family:monospace;color:var(--green);">$${fmt(guaranteedIncome)}/yr (${totalAnnualExpenses>0?Math.round(guaranteedIncome/totalAnnualExpenses*100):0}%)</span>
+  </div>
+  <div style="border-top:1px solid var(--border2);padding-top:8px;margin-top:8px;display:flex;justify-content:space-between;">
+    <span style="font-size:12px;font-weight:700;color:var(--text);">Portfolio must cover</span>
+    <span style="font-size:13px;font-family:monospace;font-weight:700;color:${portfolioGap>safeWithdrawal4?'var(--red)':'var(--amber-light)'};">$${fmt(portfolioGap)}/yr</span>
+  </div>`;
+  expHtml += '</div>';
+  document.getElementById('cir-expense-box').innerHTML = expHtml;
+
+  //  Runway visualization 
+  const targetYrs = retirementYrs;
+  const runPct = Math.min(100, portfolioYears/targetYrs*100);
+  const runColor = portfolioYears >= targetYrs ? '#34d399' : portfolioYears >= targetYrs*0.75 ? '#f59e0b' : '#f87171';
+  let runHtml = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+      <span style="font-size:12px;color:var(--text2);">Portfolio longevity vs needed</span>
+      <span style="font-size:12px;font-family:monospace;color:${runColor};">${portfolioYears>=99?'99+':portfolioYears} yrs vs ${targetYrs} needed</span>
+    </div>
+    <div style="background:var(--bg3);border-radius:999px;height:10px;overflow:hidden;margin-bottom:16px;">
+      <div style="width:${runPct}%;height:100%;border-radius:999px;background:${runColor};transition:width 0.4s;"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;">
+      <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:3px;">4% Safe Draw</div><div style="font-family:monospace;font-size:15px;font-weight:700;color:var(--green);">$${fmt(safeWithdrawal4)}</div></div>
+      <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:3px;">3.5% Conservative</div><div style="font-family:monospace;font-size:15px;font-weight:700;color:var(--blue);">$${fmt(safeWithdrawal35)}</div></div>
+      <div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:3px;">Annual Gap</div><div style="font-family:monospace;font-size:15px;font-weight:700;color:${portfolioGap>safeWithdrawal4?'var(--red)':'var(--amber-light)'};">${portfolioGap<=safeWithdrawal4?'Covered':'$'+fmt(portfolioGap-safeWithdrawal4)+' short'}</div></div>
+    </div>`;
+  document.getElementById('cir-runway-box').innerHTML = runHtml;
+
+  //  What-If Scenarios 
+  function scenarioCoverage(extraSavings, expCut, extraYears, ssBoost) {
+    const newPortfolio = totalPortfolio * Math.pow(1 + retRate, yearsUntilRet + extraYears) + extraSavings * (Math.pow(1+retRate, yearsUntilRet+extraYears)-1)/retRate;
+    const newSW = newPortfolio * 0.04;
+    const newGap = Math.max(0, totalAnnualExpenses*(1-expCut) - (guaranteedIncome+ssBoost));
+    return newGap > 0 ? newSW/newGap : 999;
+  }
+
+  const scenarios = [
+    { label:'Work 2 more years', sub:'Push retirement to age '+(retAge+2), ratio: scenarioCoverage(0,0,2,0) },
+    { label:'Cut expenses 10%', sub:'Save $'+fmt(totalAnnualExpenses*0.10)+'/yr', ratio: scenarioCoverage(0,0.10,0,0) },
+    { label:'Save $5k more/yr', sub:'Increase annual contributions', ratio: scenarioCoverage(5000,0,0,0) },
+    { label:'Delay SS 2 years', sub:'Adds ~16% more SS benefit', ratio: scenarioCoverage(0,0,0,ssAnnual*0.16) },
+  ];
+
+  document.getElementById('cir-scenarios').innerHTML = scenarios.map(s => {
+    const good = s.ratio >= 1.15;
+    const ok   = s.ratio >= 0.90;
+    const color = good ? 'var(--green)' : ok ? 'var(--amber-light)' : 'var(--red)';
+    const tag   = good ? bdg('Resolves gap','green') : ok ? bdg('Helps significantly','amber') : bdg('Not enough alone','red');
+    return `<div class="box" style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;">${s.label}</div>
+        <div style="font-size:11px;color:var(--text3);">${s.sub}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-size:16px;font-weight:700;font-family:monospace;color:${color};margin-bottom:4px;">${s.ratio>=10?'Covered':(s.ratio*100).toFixed(0)+'%'}</div>
+        ${tag}
+      </div>
+    </div>`;
+  }).join('');
+
+  //  Readiness Checklist 
+  const checks = [
+    { label:'Emergency fund (6+ months expenses)', done: cash >= totalAnnualExpenses*0.5, tip:'Keep '+(married?'6':'3')+'-12 months cash accessible. Prevents selling investments in a downturn.' },
+    { label:'Safe withdrawal rate under 4%', done: actualSWR <= 4, tip:'Your required SWR is '+actualSWR.toFixed(1)+'%. Under 4% is considered sustainable for 30+ year retirements.' },
+    { label:'Portfolio covers 25x annual gap', done: projectedPortfolio >= portfolioGap*25, tip:'The 4% rule requires 25x your portfolio-dependent spending. You need $'+fmt(portfolioGap*25)+' vs $'+fmt(projectedPortfolio)+' projected.' },
+    { label:'Healthcare coverage secured', done: hcType !== 'cobra', tip: hcType==='cobra' ? 'COBRA only lasts 18 months. Plan your bridge to Medicare or ACA before it expires.' : 'Good -- you have a long-term coverage plan.' },
+    { label:'Portfolio runway exceeds life expectancy', done: portfolioYears >= retirementYrs, tip:'Your portfolio lasts an estimated '+(portfolioYears>=99?'99+':portfolioYears)+' years vs '+(retirementYrs)+' years needed.' },
+    { label:'Debt-free or low debt at retirement', done: debt < totalAnnualExpenses*0.15, tip: debt===0 ? 'Excellent -- no debt payments in retirement.' : 'Debt payments of $'+fmt(debt)+'/yr consume '+Math.round(debt/totalAnnualExpenses*100)+'% of your budget.' },
+    { label:'Social Security strategy decided', done: ssAnnual > 0, tip: ssAnnual===0 ? 'Enter your SS estimate above. Visit ssa.gov/myaccount for your official projection.' : 'Good -- SS contributes $'+fmt(ssAnnual)+'/yr ('+Math.round(ssAnnual/totalAnnualExpenses*100)+'% of expenses).' },
+    { label:'Guaranteed income covers at least 50% of expenses', done: guaranteedIncome >= totalAnnualExpenses*0.5, tip:'Guaranteed income (SS + pension) covers '+Math.round(guaranteedIncome/totalAnnualExpenses*100)+'% of expenses. 50%+ provides meaningful security.' },
+  ];
+
+  const passed = checks.filter(c=>c.done).length;
+  document.getElementById('cir-checklist').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <span style="font-size:12px;color:var(--text2);">${passed} of ${checks.length} criteria met</span>
+      <span style="font-size:12px;font-family:monospace;font-weight:700;color:${passed>=7?'var(--green)':passed>=5?'var(--amber)':'var(--red)'};">${passed>=7?'Strong':'passed<5'?'Needs work':'Improving'}</span>
+    </div>
+    <div style="background:var(--bg3);border-radius:999px;height:6px;overflow:hidden;margin-bottom:16px;">
+      <div style="width:${passed/checks.length*100}%;height:100%;border-radius:999px;background:${passed>=7?'var(--green)':passed>=5?'var(--amber)':'var(--red)'};transition:width 0.4s;"></div>
+    </div>
+    ${checks.map(c=>`
+      <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);">
+        <div style="width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:${c.done?'var(--green-dim)':'var(--red-dim)'};border:1px solid ${c.done?'var(--green-border)':'var(--red-border)'};color:${c.done?'var(--green)':'var(--red)'};">${c.done?'&#10003;':'&#10007;'}</div>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:${c.done?'var(--text)':'var(--text2)'};margin-bottom:2px;">${c.label}</div>
+          <div style="font-size:11px;color:var(--text3);line-height:1.5;">${c.tip}</div>
+        </div>
+      </div>`).join('')}`;
+
+  //  Insights 
+  let i = '';
+  // Healthcare-specific insight
+  if(hcType==='aca'){
+    const magi_estimate = portfolioGap*0.85;
+    i += ins('blue','ACA bridge strategy','On ACA before Medicare, your MAGI (income drawn from portfolio) determines subsidy level. Roth withdrawals are excluded from MAGI -- consider using Roth funds first to stay in a better subsidy band.');
+  } else if(hcType==='cobra'){
+    i += ins('red','COBRA has an 18-month limit','COBRA is expensive and temporary. You must transition to ACA or Medicare before coverage expires. Plan now -- gaps in coverage can mean devastating out-of-pocket costs.');
+  } else if(hcType==='medicare'){
+    i += ins('green','Medicare at 65 is a major expense reducer','Medicare Part B + D + a Medigap plan typically costs $300-500/month per person. Budget for both spouses. Medicare does not cover dental, vision, or hearing.');
+  }
+
+  if(debt > 0){
+    i += ins('amber','Retire debt-free if possible','Carrying debt into retirement reduces flexibility. Even paying off your mortgage before retiring can significantly reduce your monthly burn rate and stress.');
+  }
+  if(actualSWR > 5){
+    i += ins('red','Withdrawal rate is too high','Withdrawing at '+actualSWR.toFixed(1)+'% annually has historically led to portfolio depletion. Work toward 4% or below. Consider working a few more years or reducing discretionary spending.');
+  } else if(actualSWR <= 3){
+    i += ins('green','Conservative withdrawal rate','At '+actualSWR.toFixed(1)+'%, your portfolio is very likely to last your lifetime and potentially grow. You may have room to spend more or leave a legacy.');
+  }
+  if(cash < totalAnnualExpenses*0.25){
+    i += ins('amber','Build your cash buffer','Enter retirement with 1-2 years of expenses in cash or short-term bonds. This prevents selling equities in a down market during the critical first years of retirement.');
+  }
+  if(ssAnnual===0){
+    i += ins('blue','Estimate your Social Security','Even a rough SS estimate changes your picture significantly. Visit ssa.gov/myaccount for your official estimate. The difference between claiming at 62 vs 70 can be $1,000+/month.');
+  }
+  if(guaranteedIncome === 0){
+    i += ins('purple','Consider an annuity for baseline income','With no guaranteed income, you bear all longevity risk. A small immediate or deferred annuity can provide a floor that covers basic expenses, letting the rest of your portfolio grow.');
+  }
+  i += ins('amber','Inflation is your biggest long-term risk','$60,000 today costs ~$109,000 in 30 years at 2% inflation or ~$131,000 at 3%. Ensure your portfolio grows faster than your spending. Equities and I-bonds provide inflation protection.');
+  i += ins('purple','The go-go, slow-go, no-go spending curve','Research shows retirees spend more in early retirement (travel, activities), less in the middle, and more again near end of life (healthcare). Budget for this curve, not flat spending.');
+  document.getElementById('cir-insights').innerHTML = i;
+}
+
+updateCIR();
+</script>
+</body>
+</html>
